@@ -130,7 +130,7 @@ namespace RoboTuner
         }
     }
 
-    public class EncoderValueChangeEventArgs
+    public class EncoderValueChangeEventArgs : EventArgs
     {
         public int newValue;
     }

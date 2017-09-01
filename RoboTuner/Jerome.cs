@@ -23,7 +23,7 @@ namespace Jerome
         public int state;
     }
 
-    public class JeromeController
+    public class JeromeController 
     {
 
         class CmdEntry

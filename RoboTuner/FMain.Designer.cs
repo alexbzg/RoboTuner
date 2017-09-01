@@ -32,13 +32,16 @@
             this.пультToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.miRemoteConnectionSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.miRemoteConnect = new System.Windows.Forms.ToolStripMenuItem();
+            this.miTune = new System.Windows.Forms.ToolStripMenuItem();
+            this.pTuning = new System.Windows.Forms.Panel();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.пультToolStripMenuItem});
+            this.пультToolStripMenuItem,
+            this.miTune});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(426, 24);
@@ -68,11 +71,26 @@
             this.miRemoteConnect.Text = "Подключиться";
             this.miRemoteConnect.Click += new System.EventHandler(this.miRemoteConnect_Click);
             // 
+            // miTune
+            // 
+            this.miTune.Name = "miTune";
+            this.miTune.Size = new System.Drawing.Size(78, 20);
+            this.miTune.Text = "Настройка";
+            // 
+            // pTuning
+            // 
+            this.pTuning.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pTuning.Location = new System.Drawing.Point(0, 24);
+            this.pTuning.Name = "pTuning";
+            this.pTuning.Size = new System.Drawing.Size(426, 378);
+            this.pTuning.TabIndex = 1;
+            // 
             // FMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(426, 402);
+            this.Controls.Add(this.pTuning);
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.MainMenuStrip = this.menuStrip1;
@@ -92,6 +110,8 @@
         private System.Windows.Forms.ToolStripMenuItem пультToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem miRemoteConnectionSettings;
         private System.Windows.Forms.ToolStripMenuItem miRemoteConnect;
+        private System.Windows.Forms.ToolStripMenuItem miTune;
+        private System.Windows.Forms.Panel pTuning;
     }
 }
 
