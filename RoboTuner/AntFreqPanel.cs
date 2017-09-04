@@ -12,7 +12,7 @@ namespace RoboTuner
 {
     public partial class AntFreqPanel : UserControl
     {
-        private AntFreqSettings _settings;
+        private int _freq;
         private bool _active = false;
         public event EventHandler activated;
         private Dictionary<string, Label> labels;
@@ -31,10 +31,11 @@ namespace RoboTuner
             labels[type].Text = val.ToString();
         }
 
-        public AntFreqPanel( AntFreqSettings settings )
+        public AntFreqPanel( int freq )
         {
-            _settings = new AntFreqSettings() { freq = settings.freq };
+            _freq = freq;
             InitializeComponent();
+            lFreq.Text = _freq.ToString();
             labels = new Dictionary<string, Label>()
             {
                 { "D", lD }, { "R", lR }, { "L", lL }, { "C", lC }

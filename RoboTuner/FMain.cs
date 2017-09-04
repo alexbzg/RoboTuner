@@ -44,6 +44,16 @@ namespace RoboTuner
             InitializeComponent();
             foreach (string dir in antennaes)
                 createTuneMenuItem(dir);
+            for (int c = 0; c < freqCount; c++ )
+            {
+                int freq = freqStart + freqStep * c;
+                AntFreqPanel afp = new AntFreqPanel(freq);
+                afp.Top = 42 + ( afp.Height - 1 ) * c;
+                //afp.Left = 0;*/
+                pTuning.Controls.Add(afp);
+                afp.Visible = true;
+            }
+            pTuning.Refresh();
             foreach ( EncoderTemplate encT in controllerTemplate.encoders)
             {
                 EncoderControl enc = new EncoderControl(remoteCtrl, encT);
