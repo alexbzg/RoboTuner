@@ -21,6 +21,10 @@ namespace RoboTuner
         static readonly int freqStep = 30;
         static readonly int freqCount = 10;
         static readonly string[] antennaes = new string[] { "E", "W", "N", "S" };
+        static readonly int[][] angles = new int[][] {
+            new int[] { 330, 150 },
+            new int[] { 60, 240 }
+        };
         static readonly ControllerTemplate controllerTemplate = new ControllerTemplate()
         {
             encoders = new EncoderTemplate[] {
@@ -38,6 +42,8 @@ namespace RoboTuner
         {
             config = new XmlConfig<RoboTunerConfig>();
             InitializeComponent();
+            foreach (string dir in antennaes)
+                createTuneMenuItem(dir);
             foreach ( EncoderTemplate encT in controllerTemplate.encoders)
             {
                 EncoderControl enc = new EncoderControl(remoteCtrl, encT);
@@ -49,6 +55,28 @@ namespace RoboTuner
                 connectRemoteCtrl();
             else
                 miRemoteConnect.Visible = false;
+        }
+
+        private void tune( string dir, int angle)
+        {
+
+        }
+
+        private void createTuneMenuItem( string dir )
+        {
+            ToolStripMenuItem mi = new ToolStripMenuItem(dir);
+            int[] dAngles = dir == "E" || dir == "W" ? angles[0] : angles[1];
+            foreach ( int angle in dAngles )
+            {
+                int a = angle;
+                string d = dir;
+                ToolStripMenuItem miAngle = new ToolStripMenuItem(angle.ToString());
+                mi.DropDownItems.Add(miAngle);
+                miAngle.Click += delegate {
+                    tune(d, a);
+                };
+            }
+            miTune.DropDownItems.Add(mi);
         }
 
         private void connectRemoteCtrl()
@@ -64,6 +92,11 @@ namespace RoboTuner
 
         private void remoteDisconnected(object sender, AsyncConnectionNS.DisconnectEventArgs e)
         {
+            DoInvoke(() =>
+           {
+               Text = "RoboTuner - Нет соединения с пультом";
+               pTuning.Enabled = false;
+           });
         }
 
         private void encValueChange(object sender, EncoderValueChangeEventArgs e)
@@ -86,8 +119,12 @@ namespace RoboTuner
 
         private void remoteConnected(object sender, EventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("remote connected");
             remoteCtrl.readlines();
+            DoInvoke(() =>
+           {
+               Text = "RoboTuner";
+               pTuning.Enabled = true;
+           });
         }
 
         private void miRemoteConnectionSettings_Click(object sender, EventArgs e)

@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.пультToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.remoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.miRemoteConnectionSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.miRemoteConnect = new System.Windows.Forms.ToolStripMenuItem();
             this.miTune = new System.Windows.Forms.ToolStripMenuItem();
@@ -40,7 +40,7 @@
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.пультToolStripMenuItem,
+            this.remoteToolStripMenuItem,
             this.miTune});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -50,12 +50,12 @@
             // 
             // пультToolStripMenuItem
             // 
-            this.пультToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.remoteToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miRemoteConnectionSettings,
             this.miRemoteConnect});
-            this.пультToolStripMenuItem.Name = "пультToolStripMenuItem";
-            this.пультToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
-            this.пультToolStripMenuItem.Text = "Пульт";
+            this.remoteToolStripMenuItem.Name = "пультToolStripMenuItem";
+            this.remoteToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
+            this.remoteToolStripMenuItem.Text = "Пульт";
             // 
             // miRemoteConnectionSettings
             // 
@@ -84,6 +84,7 @@
             this.pTuning.Name = "pTuning";
             this.pTuning.Size = new System.Drawing.Size(426, 378);
             this.pTuning.TabIndex = 1;
+            this.pTuning.Enabled = false;
             // 
             // FMain
             // 
@@ -107,7 +108,7 @@
         #endregion
 
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem пультToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem remoteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem miRemoteConnectionSettings;
         private System.Windows.Forms.ToolStripMenuItem miRemoteConnect;
         private System.Windows.Forms.ToolStripMenuItem miTune;
