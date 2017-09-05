@@ -34,13 +34,15 @@
             this.miRemoteConnect = new System.Windows.Forms.ToolStripMenuItem();
             this.miTune = new System.Windows.Forms.ToolStripMenuItem();
             this.pTuning = new System.Windows.Forms.Panel();
+            this.lAntTitle = new System.Windows.Forms.Label();
             this.lR = new System.Windows.Forms.Label();
             this.lL = new System.Windows.Forms.Label();
             this.lC = new System.Windows.Forms.Label();
             this.lAux = new System.Windows.Forms.Label();
             this.lAngle = new System.Windows.Forms.Label();
             this.lD = new System.Windows.Forms.Label();
-            this.lAntTitle = new System.Windows.Forms.Label();
+            this.bSave = new System.Windows.Forms.Button();
+            this.bCancel = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.pTuning.SuspendLayout();
             this.SuspendLayout();
@@ -52,7 +54,7 @@
             this.miTune});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(274, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(275, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -87,6 +89,8 @@
             // 
             // pTuning
             // 
+            this.pTuning.Controls.Add(this.bCancel);
+            this.pTuning.Controls.Add(this.bSave);
             this.pTuning.Controls.Add(this.lAntTitle);
             this.pTuning.Controls.Add(this.lR);
             this.pTuning.Controls.Add(this.lL);
@@ -98,8 +102,17 @@
             this.pTuning.Enabled = false;
             this.pTuning.Location = new System.Drawing.Point(0, 24);
             this.pTuning.Name = "pTuning";
-            this.pTuning.Size = new System.Drawing.Size(274, 378);
+            this.pTuning.Size = new System.Drawing.Size(275, 378);
             this.pTuning.TabIndex = 1;
+            // 
+            // lAntTitle
+            // 
+            this.lAntTitle.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lAntTitle.Location = new System.Drawing.Point(0, 0);
+            this.lAntTitle.Name = "lAntTitle";
+            this.lAntTitle.Size = new System.Drawing.Size(275, 27);
+            this.lAntTitle.TabIndex = 6;
+            this.lAntTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lR
             // 
@@ -163,26 +176,42 @@
             this.lD.Text = "D";
             this.lD.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // lAntTitle
+            // bSave
             // 
-            this.lAntTitle.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lAntTitle.Location = new System.Drawing.Point(0, 0);
-            this.lAntTitle.Name = "lAntTitle";
-            this.lAntTitle.Size = new System.Drawing.Size(274, 27);
-            this.lAntTitle.TabIndex = 6;
-            this.lAntTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.bSave.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.bSave.Location = new System.Drawing.Point(4, 347);
+            this.bSave.Name = "bSave";
+            this.bSave.Size = new System.Drawing.Size(168, 28);
+            this.bSave.TabIndex = 2;
+            this.bSave.Text = "Сохранить";
+            this.bSave.UseVisualStyleBackColor = true;
+            this.bSave.Click += new System.EventHandler(this.bSave_Click);
+            // 
+            // bCancel
+            // 
+            this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bCancel.Location = new System.Drawing.Point(178, 347);
+            this.bCancel.Name = "bCancel";
+            this.bCancel.Size = new System.Drawing.Size(94, 28);
+            this.bCancel.TabIndex = 7;
+            this.bCancel.Text = "Отмена";
+            this.bCancel.UseVisualStyleBackColor = true;
+            this.bCancel.Click += new System.EventHandler(this.bCancel_Click);
             // 
             // FMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(274, 402);
+            this.ClientSize = new System.Drawing.Size(275, 402);
             this.Controls.Add(this.pTuning);
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "FMain";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "RoboTuner";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -207,6 +236,8 @@
         private System.Windows.Forms.Label lAngle;
         private System.Windows.Forms.Label lD;
         private System.Windows.Forms.Label lAntTitle;
+        private System.Windows.Forms.Button bCancel;
+        private System.Windows.Forms.Button bSave;
     }
 }
 

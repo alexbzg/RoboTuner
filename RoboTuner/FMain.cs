@@ -43,7 +43,7 @@ namespace RoboTuner
         Dictionary<int, EncoderLine> encoderLines = new Dictionary<int, EncoderLine>();
         Dictionary<int, AntFreqPanel> antFreqPanels = new Dictionary<int, AntFreqPanel>();
         EncoderControl[] encoders = new EncoderControl[controllerTemplate.encoders.Length];
-        int activeFreq = 0;
+        int currentFreq = 0;
         bool activeType = false;
         Color defColor;
         string currentDir;
@@ -68,9 +68,9 @@ namespace RoboTuner
                 antFreqPanels[freq] = afp;
                 afp.activated += delegate (object sender, EventArgs e)
                 {
-                    if (activeFreq != 0)
-                        antFreqPanels[activeFreq].deactivate();
-                    setActiveFreq( freq );
+                    if (currentFreq != 0)
+                        antFreqPanels[currentFreq].deactivate();
+                    setCurrentFreq( freq );
                 };
             }
             pTuning.Refresh();
@@ -81,24 +81,18 @@ namespace RoboTuner
             tune(directions[0], angles[directions[0]][0]);
         }
 
-        private void setActiveFreq( int freq )
+        private void setCurrentFreq( int freq )
         {
-            if ( activeFreq != freq )
+            currentFreq = freq;
+            AntFreqSettings storedAFS = config.data.getFreqSettings( currentDir, currentAngle, freq );
+            curFreqSettings = new AntFreqSettings()
             {
-                activeFreq = freq;
-                AntFreqSettings storedAFS = config.data.antennaeSettings?.Find(x => x.antID.dir == currentDir && x.antID.angle == currentAngle)?
-                    .settings?.Find( x => x.freq == freq );
-                if (storedAFS == null)
-                    storedAFS = new AntFreqSettings() { freq = freq };
-                curFreqSettings = new AntFreqSettings()
-                {
-                    freq = freq,
-                    D = storedAFS.D,
-                    R = storedAFS.R,
-                    L = storedAFS.L,
-                    C = storedAFS.C
-                };
-            }
+                freq = freq,
+                D = storedAFS.D,
+                R = storedAFS.R,
+                L = storedAFS.L,
+                C = storedAFS.C
+            };
         }
 
         private void tune( string dir, int angle)
@@ -108,15 +102,14 @@ namespace RoboTuner
             currentAngle = angle;
             currentDir = dir;
             setActiveType(true);
-            AntSettings settings = config.data.antennaeSettings?.Find(x => x.antID.dir == dir && x.antID.angle == angle);
             foreach (int freq in antFreqPanels.Keys )
             {
                 AntFreqPanel afp = antFreqPanels[freq];
-                AntFreqSettings freqSettings = settings?.settings?.Find(x => x.freq == freq);
-                afp.setCaption("D", freqSettings != null ? freqSettings.D : 0);
-                afp.setCaption("R", freqSettings != null ? freqSettings.R : 0);
-                afp.setCaption("L", freqSettings != null ? freqSettings.L : 0);
-                afp.setCaption("C", freqSettings != null ? freqSettings.C : 0);
+                AntFreqSettings freqSettings = config.data.getFreqSettings( dir, angle, freq );
+                afp.setCaption("D", freqSettings.D);
+                afp.setCaption("R", freqSettings.R);
+                afp.setCaption("L", freqSettings.L);
+                afp.setCaption("C", freqSettings.C);
             }
             antFreqPanels[freqStart].activate();
         }
@@ -206,7 +199,7 @@ namespace RoboTuner
                       curFreqSettings.C = e.newValue;
                   }
               }
-              antFreqPanels[activeFreq].setCaption(cptType, e.newValue);
+              antFreqPanels[currentFreq].setCaption(cptType, e.newValue);
               //label1.Text = e.newValue.ToString();
           });
         }
@@ -292,6 +285,21 @@ namespace RoboTuner
             miRemoteConnect.Text = "Подключиться";
             miRemoteConnectionSettings.Visible = true;
         }
+
+        private void bSave_Click(object sender, EventArgs e)
+        {
+            AntFreqSettings storedAFS = config.data.getFreqSettings(currentDir, currentAngle, currentFreq);
+            storedAFS.D = curFreqSettings.D;
+            storedAFS.R = curFreqSettings.R;
+            storedAFS.L = curFreqSettings.L;
+            storedAFS.C = curFreqSettings.C;
+            writeConfig();
+        }
+
+        private void bCancel_Click(object sender, EventArgs e)
+        {
+            setCurrentFreq(currentFreq);
+        }
     }
 
     public class EncoderValueChangeEventArgs : EventArgs
@@ -360,13 +368,33 @@ namespace RoboTuner
     public class AntSettings
     {
         public AntID antID;
-        public List<AntFreqSettings> settings;
+        public List<AntFreqSettings> settings = new List<AntFreqSettings>();
 
     }
 
     public class RoboTunerConfig: StorableFormConfig
     {
         public JeromeConnectionParams remoteJeromeParams;
-        public List<AntSettings> antennaeSettings;
+        public List<AntSettings> antennaeSettings = new List<AntSettings>();
+
+        public AntFreqSettings getFreqSettings(string dir, int angle, int freq )
+        {
+            AntSettings settings = antennaeSettings.Find(x => x.antID.dir == dir && x.antID.angle == angle);
+            if (settings == null)
+            {
+                settings = new AntSettings()
+                {
+                    antID = new AntID { dir = dir, angle = angle },
+                };
+                antennaeSettings.Add(settings);
+            }
+            AntFreqSettings afs = settings.settings.Find(x => x.freq == freq);
+            if (afs == null)
+            {
+                afs = new AntFreqSettings() { freq = freq };
+                settings.settings.Add(afs);
+            }
+            return afs;
+        }
     }
 }
