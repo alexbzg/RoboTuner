@@ -68,7 +68,7 @@ namespace RoboTuner
                 antFreqPanels[freq] = afp;
                 afp.activated += delegate (object sender, EventArgs e)
                 {
-                    if (currentFreq != 0)
+                    if (currentFreq != 0 && currentFreq != freq)
                         antFreqPanels[currentFreq].deactivate();
                     setCurrentFreq( freq );
                 };
