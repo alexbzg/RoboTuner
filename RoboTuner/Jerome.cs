@@ -262,9 +262,10 @@ namespace Jerome
             }
         }
 
-        public void setLineMode(int line, int mode)
+        public void setLineMode(int line, string mode)
         {
-            newCmd("IO,SET," + line.ToString() + "," + mode.ToString());
+            int intMode = mode == "in" ? 1 : 0;
+            newCmd("IO,SET," + line.ToString() + "," + intMode.ToString());
         }
 
         public void switchLine(int line, int state)

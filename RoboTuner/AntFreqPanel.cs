@@ -18,6 +18,7 @@ namespace RoboTuner
         private Dictionary<string, Label> labels;
         private Color defColor;
         public bool active => _active;
+        public int freq => _freq;
 
         public void deactivate()
         {
@@ -41,16 +42,23 @@ namespace RoboTuner
                 { "D", lD }, { "R", lR }, { "L", lL }, { "C", lC }
             };
             defColor = ForeColor;
+            foreach (Control c in Controls)
+                c.Click += AntFreqPanel_Click;
         }
 
         private void AntFreqPanel_Click(object sender, EventArgs e)
         {
             if (!_active)
             {
-                _active = true;
-                ForeColor = Color.Red;
-                activated?.Invoke(this, EventArgs.Empty);
+                activate();
             }
+        }
+
+        public void activate()
+        {
+            _active = true;
+            ForeColor = Color.Red;
+            activated?.Invoke(this, EventArgs.Empty);
         }
     }
 }

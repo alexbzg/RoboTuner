@@ -34,12 +34,13 @@
             this.miRemoteConnect = new System.Windows.Forms.ToolStripMenuItem();
             this.miTune = new System.Windows.Forms.ToolStripMenuItem();
             this.pTuning = new System.Windows.Forms.Panel();
-            this.lD = new System.Windows.Forms.Label();
-            this.lAngle = new System.Windows.Forms.Label();
-            this.lAux = new System.Windows.Forms.Label();
-            this.lC = new System.Windows.Forms.Label();
-            this.lL = new System.Windows.Forms.Label();
             this.lR = new System.Windows.Forms.Label();
+            this.lL = new System.Windows.Forms.Label();
+            this.lC = new System.Windows.Forms.Label();
+            this.lAux = new System.Windows.Forms.Label();
+            this.lAngle = new System.Windows.Forms.Label();
+            this.lD = new System.Windows.Forms.Label();
+            this.lAntTitle = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.pTuning.SuspendLayout();
             this.SuspendLayout();
@@ -86,6 +87,7 @@
             // 
             // pTuning
             // 
+            this.pTuning.Controls.Add(this.lAntTitle);
             this.pTuning.Controls.Add(this.lR);
             this.pTuning.Controls.Add(this.lL);
             this.pTuning.Controls.Add(this.lC);
@@ -99,65 +101,76 @@
             this.pTuning.Size = new System.Drawing.Size(274, 378);
             this.pTuning.TabIndex = 1;
             // 
-            // lD
+            // lR
             // 
-            this.lD.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lD.Location = new System.Drawing.Point(71, 21);
-            this.lD.Name = "lD";
-            this.lD.Size = new System.Drawing.Size(51, 22);
-            this.lD.TabIndex = 0;
-            this.lD.Text = "D";
-            this.lD.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lAngle
-            // 
-            this.lAngle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lAngle.Location = new System.Drawing.Point(71, 0);
-            this.lAngle.Name = "lAngle";
-            this.lAngle.Size = new System.Drawing.Size(102, 22);
-            this.lAngle.TabIndex = 1;
-            this.lAngle.Text = "330";
-            this.lAngle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lAux
-            // 
-            this.lAux.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lAux.Location = new System.Drawing.Point(170, 0);
-            this.lAux.Name = "lAux";
-            this.lAux.Size = new System.Drawing.Size(102, 22);
-            this.lAux.TabIndex = 2;
-            this.lAux.Text = "Согласован.";
-            this.lAux.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lC
-            // 
-            this.lC.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lC.Location = new System.Drawing.Point(220, 21);
-            this.lC.Name = "lC";
-            this.lC.Size = new System.Drawing.Size(52, 22);
-            this.lC.TabIndex = 3;
-            this.lC.Text = "C";
-            this.lC.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lR.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lR.Location = new System.Drawing.Point(120, 49);
+            this.lR.Name = "lR";
+            this.lR.Size = new System.Drawing.Size(52, 22);
+            this.lR.TabIndex = 5;
+            this.lR.Text = "R";
+            this.lR.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lL
             // 
             this.lL.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lL.Location = new System.Drawing.Point(170, 21);
+            this.lL.Location = new System.Drawing.Point(170, 49);
             this.lL.Name = "lL";
-            this.lL.Size = new System.Drawing.Size(51, 22);
+            this.lL.Size = new System.Drawing.Size(54, 22);
             this.lL.TabIndex = 4;
             this.lL.Text = "L";
             this.lL.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // lR
+            // lC
             // 
-            this.lR.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lR.Location = new System.Drawing.Point(121, 21);
-            this.lR.Name = "lR";
-            this.lR.Size = new System.Drawing.Size(50, 22);
-            this.lR.TabIndex = 5;
-            this.lR.Text = "R";
-            this.lR.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lC.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lC.Location = new System.Drawing.Point(223, 49);
+            this.lC.Name = "lC";
+            this.lC.Size = new System.Drawing.Size(53, 22);
+            this.lC.TabIndex = 3;
+            this.lC.Text = "C";
+            this.lC.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lAux
+            // 
+            this.lAux.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lAux.Location = new System.Drawing.Point(171, 28);
+            this.lAux.Name = "lAux";
+            this.lAux.Size = new System.Drawing.Size(105, 22);
+            this.lAux.TabIndex = 2;
+            this.lAux.Text = "Согласован.";
+            this.lAux.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lAux.Click += new System.EventHandler(this.lAngleAux_Click);
+            // 
+            // lAngle
+            // 
+            this.lAngle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lAngle.Location = new System.Drawing.Point(69, 28);
+            this.lAngle.Name = "lAngle";
+            this.lAngle.Size = new System.Drawing.Size(104, 22);
+            this.lAngle.TabIndex = 1;
+            this.lAngle.Text = "330";
+            this.lAngle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lAngle.Click += new System.EventHandler(this.lAngleAux_Click);
+            // 
+            // lD
+            // 
+            this.lD.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lD.Location = new System.Drawing.Point(69, 49);
+            this.lD.Name = "lD";
+            this.lD.Size = new System.Drawing.Size(52, 22);
+            this.lD.TabIndex = 0;
+            this.lD.Text = "D";
+            this.lD.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lAntTitle
+            // 
+            this.lAntTitle.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lAntTitle.Location = new System.Drawing.Point(0, 0);
+            this.lAntTitle.Name = "lAntTitle";
+            this.lAntTitle.Size = new System.Drawing.Size(274, 27);
+            this.lAntTitle.TabIndex = 6;
+            this.lAntTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // FMain
             // 
@@ -193,6 +206,7 @@
         private System.Windows.Forms.Label lAux;
         private System.Windows.Forms.Label lAngle;
         private System.Windows.Forms.Label lD;
+        private System.Windows.Forms.Label lAntTitle;
     }
 }
 

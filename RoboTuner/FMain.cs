@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Jerome;
-using System.Threading;
-using System.Collections.Concurrent;
+﻿using Jerome;
 using StorableFormState;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
 using XmlConfigNS;
 
 namespace RoboTuner
@@ -20,63 +13,96 @@ namespace RoboTuner
         static readonly int freqStart = 3520;
         static readonly int freqStep = 30;
         static readonly int freqCount = 10;
-        static readonly string[] antennaes = new string[] { "E", "W", "N", "S" };
-        static readonly int[][] angles = new int[][] {
-            new int[] { 330, 150 },
-            new int[] { 60, 240 }
+        static readonly string[] directions = new string[] { "E", "W", "N", "S" };
+        static readonly Dictionary<string, string> antennaeTitles = new Dictionary<string, string>
+        {
+            { "E", "Восточная" }, { "W", "Западная" }, { "N", "Северная" }, { "S", "Южная" },
+        };
+        static readonly Dictionary<string, int[]> angles = new Dictionary<string, int[]> {
+            { "E", new int[] { 330, 150 } },
+            { "W", new int[] { 330, 150 } },
+            { "N", new int[] { 60, 240 } },
+            { "S", new int[] { 60, 240 } },
         };
         static readonly ControllerTemplate controllerTemplate = new ControllerTemplate()
         {
             encoders = new EncoderTemplate[] {
                 new EncoderTemplate()
                 {
-                    lines = new int[] { 7, 6 }
+                    lines = new int[] { 5, 6 }
+                },
+                new EncoderTemplate()
+                {
+                    lines = new int[] { 1, 2 }
                 }
+
             }
         };
 
         JeromeController remoteCtrl;
-        Dictionary<int, EncoderLine> lines = new Dictionary<int, EncoderLine>();
+        Dictionary<int, EncoderLine> encoderLines = new Dictionary<int, EncoderLine>();
+        Dictionary<int, AntFreqPanel> antFreqPanels = new Dictionary<int, AntFreqPanel>();
+        EncoderControl[] encoders = new EncoderControl[controllerTemplate.encoders.Length];
+        int activeFreq = 0;
+        bool activeType = false;
+        Color defColor;
+        string currentDir;
+        int currentAngle;
 
         public FMain()
         {
             config = new XmlConfig<RoboTunerConfig>();
             InitializeComponent();
-            foreach (string dir in antennaes)
+            defColor = ForeColor;
+            foreach (string dir in directions)
                 createTuneMenuItem(dir);
             for (int c = 0; c < freqCount; c++ )
             {
                 int freq = freqStart + freqStep * c;
                 AntFreqPanel afp = new AntFreqPanel(freq);
-                afp.Top = 42 + ( afp.Height - 1 ) * c;
-                //afp.Left = 0;*/
+                afp.Top = 70 + ( afp.Height - 1 ) * c;
+                afp.Left = -1;
                 pTuning.Controls.Add(afp);
                 afp.Visible = true;
+                antFreqPanels[freq] = afp;
+                afp.activated += delegate (object sender, EventArgs e)
+                {
+                    if (activeFreq != 0)
+                        antFreqPanels[activeFreq].deactivate();
+                    activeFreq = freq;
+                };
             }
             pTuning.Refresh();
-            foreach ( EncoderTemplate encT in controllerTemplate.encoders)
-            {
-                EncoderControl enc = new EncoderControl(remoteCtrl, encT);
-                lines[encT.lines[0]] = new EncoderLine() { dir = -1, enc = enc };
-                lines[encT.lines[1]] = new EncoderLine() { dir = 1, enc = enc };
-                enc.valueChange += encValueChange;
-            }
             if (config.data.remoteJeromeParams != null)
                 connectRemoteCtrl();
             else
                 miRemoteConnect.Visible = false;
+            tune(directions[0], angles[directions[0]][0]);
         }
 
         private void tune( string dir, int angle)
         {
-
+            lAngle.Text = angle.ToString();
+            lAntTitle.Text = antennaeTitles[dir];
+            currentAngle = angle;
+            currentDir = dir;
+            setActiveType(true);
+            AntSettings settings = config.data.antennaeSettings?.Find(x => x.antID.dir == dir && x.antID.angle == angle);
+            foreach (int freq in antFreqPanels.Keys )
+            {
+                AntFreqPanel afp = antFreqPanels[freq];
+                AntFreqSettings freqSettings = settings?.settings?.Find(x => x.freq == freq);
+                afp.setCaption("D", freqSettings != null ? freqSettings.D : 0);
+                afp.setCaption("R", freqSettings != null ? freqSettings.R : 0);
+                afp.setCaption("L", freqSettings != null ? freqSettings.L : 0);
+                afp.setCaption("C", freqSettings != null ? freqSettings.C : 0);
+            }
         }
 
         private void createTuneMenuItem( string dir )
         {
             ToolStripMenuItem mi = new ToolStripMenuItem(dir);
-            int[] dAngles = dir == "E" || dir == "W" ? angles[0] : angles[1];
-            foreach ( int angle in dAngles )
+            foreach ( int angle in angles[dir] )
             {
                 int a = angle;
                 string d = dir;
@@ -92,6 +118,25 @@ namespace RoboTuner
         private void connectRemoteCtrl()
         {
             remoteCtrl = JeromeController.create( config.data.remoteJeromeParams );
+            int encC = 0;
+            foreach (EncoderTemplate encT in controllerTemplate.encoders)
+            {
+                EncoderControl enc = new EncoderControl(remoteCtrl, encT);
+                encoders[encC] = enc;
+                for (int c = 0; c < encT.lines.Length; c++)
+                {
+                    int line = encT.lines[c];
+                    encoderLines[line] = new EncoderLine() { dir = c == 0 ? -1 : 1, enc = enc };
+                    remoteCtrl.setLineMode(line, "in");
+                }
+                encoderLines[encT.lines[1]] = new EncoderLine() { dir = 1, enc = enc };
+                int _encC = encC;
+                enc.valueChange += delegate (object sender, EncoderValueChangeEventArgs e)
+                {
+                    encValueChange(_encC, e);
+                };
+                encC++;
+            }
             remoteCtrl.onConnected += remoteConnected;
             remoteCtrl.lineStateChanged += remoteLineStateChanged;
             remoteCtrl.onDisconnected += remoteDisconnected;
@@ -109,19 +154,34 @@ namespace RoboTuner
            });
         }
 
-        private void encValueChange(object sender, EncoderValueChangeEventArgs e)
+        private void encValueChange(int encC, EncoderValueChangeEventArgs e)
         {
             DoInvoke(() =>
           {
+              string cptType;
+              if (activeType)
+              {
+                  if (encC == 0)
+                      cptType = "D";
+                  else
+                      cptType = "R";
+              } else
+              {
+                  if (encC == 0)
+                      cptType = "L";
+                  else
+                      cptType = "C";
+              }
+              antFreqPanels[activeFreq].setCaption(cptType, e.newValue);
               //label1.Text = e.newValue.ToString();
           });
         }
 
         private void remoteLineStateChanged(object sender, LineStateChangedEventArgs e)
         {
-            if (lines.ContainsKey(e.line))
+            if (encoderLines.ContainsKey(e.line))
             {
-                EncoderLine encL = lines[e.line];
+                EncoderLine encL = encoderLines[e.line];
                 encL.enc.lineChange(encL.dir, e.state);
             }
         }
@@ -159,6 +219,29 @@ namespace RoboTuner
                 disconnectRemoteCtrl();
             else
                 connectRemoteCtrl();
+        }
+
+        private void lAngleAux_Click(object sender, EventArgs e )
+        {
+            setActiveType(sender == lAngle);
+        }
+
+        private void setActiveType( bool type)
+        {
+            if (type != activeType)
+            {
+                if (type)
+                {
+                    lAngle.ForeColor = Color.Red;
+                    lAux.ForeColor = defColor;
+                }
+                else
+                {
+                    lAngle.ForeColor = defColor;
+                    lAux.ForeColor = Color.Red;
+                }
+                activeType = type;
+            }
         }
 
         private void disconnectRemoteCtrl()
@@ -234,9 +317,15 @@ namespace RoboTuner
         public int C;
     }
 
+    public class AntID
+    {
+        public string dir;
+        public int angle;
+    }
+
     public class AntSettings
     {
-        public string antennae;
+        public AntID antID;
         public List<AntFreqSettings> settings;
     }
 

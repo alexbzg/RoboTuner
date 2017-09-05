@@ -91,7 +91,7 @@
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label1.Location = new System.Drawing.Point(119, -1);
+            this.label1.Location = new System.Drawing.Point(120, -1);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(2, 37);
             this.label1.TabIndex = 5;
@@ -130,8 +130,7 @@
             // 
             // AntFreqPanel
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Controls.Add(this.lC);
             this.Controls.Add(this.label4);
@@ -145,7 +144,7 @@
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "AntFreqPanel";
-            this.Size = new System.Drawing.Size(274, 35);
+            this.Size = new System.Drawing.Size(277, 35);
             this.Click += new System.EventHandler(this.AntFreqPanel_Click);
             this.ResumeLayout(false);
             this.PerformLayout();
