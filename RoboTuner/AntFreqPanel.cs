@@ -32,6 +32,14 @@ namespace RoboTuner
             labels[type].Text = val.ToString();
         }
 
+        public void setAllCaptions( AntFreqSettings settings)
+        {
+            setCaption("D", settings.D);
+            setCaption("R", settings.R);
+            setCaption("L", settings.L);
+            setCaption("C", settings.C);
+        }
+
         public AntFreqPanel( int freq )
         {
             _freq = freq;

@@ -68,9 +68,8 @@ namespace RoboTuner
                 antFreqPanels[freq] = afp;
                 afp.activated += delegate (object sender, EventArgs e)
                 {
-                    if (currentFreq != 0 && currentFreq != freq)
-                        antFreqPanels[currentFreq].deactivate();
-                    setCurrentFreq( freq );
+                    if (currentFreq != freq)
+                        setCurrentFreq( freq );
                 };
             }
             pTuning.Refresh();
@@ -83,6 +82,8 @@ namespace RoboTuner
 
         private void setCurrentFreq( int freq )
         {
+            if (currentFreq != 0 && currentFreq != freq)
+                antFreqPanels[currentFreq].deactivate();
             currentFreq = freq;
             AntFreqSettings storedAFS = config.data.getFreqSettings( currentDir, currentAngle, freq );
             curFreqSettings = new AntFreqSettings()
@@ -93,6 +94,10 @@ namespace RoboTuner
                 L = storedAFS.L,
                 C = storedAFS.C
             };
+            AntFreqPanel afp = antFreqPanels[currentFreq];
+            afp.setAllCaptions(curFreqSettings);
+            if (!afp.active)
+                afp.activate();
         }
 
         private void tune( string dir, int angle)
@@ -106,10 +111,7 @@ namespace RoboTuner
             {
                 AntFreqPanel afp = antFreqPanels[freq];
                 AntFreqSettings freqSettings = config.data.getFreqSettings( dir, angle, freq );
-                afp.setCaption("D", freqSettings.D);
-                afp.setCaption("R", freqSettings.R);
-                afp.setCaption("L", freqSettings.L);
-                afp.setCaption("C", freqSettings.C);
+                afp.setAllCaptions(freqSettings);
             }
             antFreqPanels[freqStart].activate();
         }
@@ -146,7 +148,7 @@ namespace RoboTuner
                 }
                 encoderLines[encT.lines[1]] = new EncoderLine() { dir = 1, enc = enc };
                 int _encC = encC;
-                enc.valueChange += delegate (object sender, EncoderValueChangeEventArgs e)
+                enc.rotated += delegate (object sender, EncoderRotatedEventArgs e)
                 {
                     encValueChange(_encC, e);
                 };
@@ -169,7 +171,7 @@ namespace RoboTuner
            });
         }
 
-        private void encValueChange(int encC, EncoderValueChangeEventArgs e)
+        private void encValueChange(int encC, EncoderRotatedEventArgs e)
         {
             DoInvoke(() =>
           {
@@ -178,29 +180,27 @@ namespace RoboTuner
               {
                   if (encC == 0)
                   {
-                      cptType = "D";
-                      curFreqSettings.D = e.newValue;
+                      curFreqSettings.D += e.value;
+                      antFreqPanels[currentFreq].setCaption("D", curFreqSettings.D);
                   }
                   else
                   {
-                      cptType = "R";
-                      curFreqSettings.R = e.newValue;
+                      curFreqSettings.R += e.value;
+                      antFreqPanels[currentFreq].setCaption("R", curFreqSettings.R);
                   }
               } else
               {
                   if (encC == 0)
                   {
-                      cptType = "L";
-                      curFreqSettings.L = e.newValue;
+                      curFreqSettings.L += e.value;
+                      antFreqPanels[currentFreq].setCaption("L", curFreqSettings.L);
                   }
                   else
                   {
-                      cptType = "C";
-                      curFreqSettings.C = e.newValue;
+                      curFreqSettings.C += e.value;
+                      antFreqPanels[currentFreq].setCaption("C", curFreqSettings.C);
                   }
               }
-              antFreqPanels[currentFreq].setCaption(cptType, e.newValue);
-              //label1.Text = e.newValue.ToString();
           });
         }
 
@@ -294,6 +294,22 @@ namespace RoboTuner
             storedAFS.L = curFreqSettings.L;
             storedAFS.C = curFreqSettings.C;
             writeConfig();
+            if (currentFreq < freqStart + freqStep * (freqCount - 1))
+                setCurrentFreq(currentFreq + freqStep);
+            else
+            {
+                int angleIdx = Array.IndexOf(angles[currentDir], currentAngle);
+                if (angleIdx < angles[currentDir].Length - 1)
+                    tune(currentDir, angles[currentDir][angleIdx + 1]);
+                else
+                {
+                    int dirIdx = Array.IndexOf(directions, currentDir);
+                    string newDir = directions[0];
+                    if (dirIdx < directions.Length - 1)
+                        newDir = directions[dirIdx + 1];
+                    tune(newDir, angles[newDir][0]);
+                }
+            }
         }
 
         private void bCancel_Click(object sender, EventArgs e)
@@ -302,9 +318,9 @@ namespace RoboTuner
         }
     }
 
-    public class EncoderValueChangeEventArgs : EventArgs
+    public class EncoderRotatedEventArgs : EventArgs
     {
-        public int newValue;
+        public int value;
     }
 
     public class EncoderLine
@@ -317,9 +333,7 @@ namespace RoboTuner
     {
         private JeromeController _ctrl;
         private Dictionary<int, int> _lines = new Dictionary<int, int> { { -1, 0 }, { 1, 0 } };
-        private int _value = 0;
-        public int value => _value;
-        public event EventHandler<EncoderValueChangeEventArgs> valueChange;
+        public event EventHandler<EncoderRotatedEventArgs> rotated;
 
         public EncoderControl( JeromeController ctrl, EncoderTemplate tmplt )
         {
@@ -333,8 +347,7 @@ namespace RoboTuner
             int otherState = _ctrl.getLineState(_lines[-dir]);
             if (otherState != -1 && otherState != state)
             {
-                _value += dir;
-                valueChange?.Invoke(this, new EncoderValueChangeEventArgs() { newValue = _value });
+                rotated?.Invoke(this, new EncoderRotatedEventArgs() { value = dir });
             }
 
         }
