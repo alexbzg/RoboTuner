@@ -118,7 +118,7 @@ namespace RoboTuner
 
         private void createTuneMenuItem( string dir )
         {
-            ToolStripMenuItem mi = new ToolStripMenuItem(dir);
+            ToolStripMenuItem mi = new ToolStripMenuItem(antennaeTitles[dir]);
             foreach ( int angle in angles[dir] )
             {
                 int a = angle;
