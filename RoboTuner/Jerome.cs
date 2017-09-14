@@ -333,6 +333,7 @@ namespace Jerome
                 name = fcp.data.name;
                 host = fcp.data.host;
                 port = fcp.data.port;
+                usartPort = fcp.data.usartPort;
                 httpPort = fcp.data.httpPort;
                 password = fcp.data.password;
                 return true;

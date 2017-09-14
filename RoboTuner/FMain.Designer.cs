@@ -32,8 +32,13 @@
             this.remoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.miRemoteConnectionSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.miRemoteConnect = new System.Windows.Forms.ToolStripMenuItem();
+            this.miAntennaes = new System.Windows.Forms.ToolStripMenuItem();
+            this.miAntennaeConnectionSettings = new System.Windows.Forms.ToolStripMenuItem();
+            this.miAntennaeConnect = new System.Windows.Forms.ToolStripMenuItem();
             this.miTune = new System.Windows.Forms.ToolStripMenuItem();
             this.pTuning = new System.Windows.Forms.Panel();
+            this.bCancel = new System.Windows.Forms.Button();
+            this.bSave = new System.Windows.Forms.Button();
             this.lAntTitle = new System.Windows.Forms.Label();
             this.lR = new System.Windows.Forms.Label();
             this.lL = new System.Windows.Forms.Label();
@@ -41,8 +46,9 @@
             this.lAux = new System.Windows.Forms.Label();
             this.lAngle = new System.Windows.Forms.Label();
             this.lD = new System.Windows.Forms.Label();
-            this.bSave = new System.Windows.Forms.Button();
-            this.bCancel = new System.Windows.Forms.Button();
+            this.lRemoteDisconnect = new System.Windows.Forms.Label();
+            this.lAntennaeDisconnect = new System.Windows.Forms.Label();
+            this.miJeromeSetup = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.pTuning.SuspendLayout();
             this.SuspendLayout();
@@ -51,6 +57,7 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.remoteToolStripMenuItem,
+            this.miAntennaes,
             this.miTune});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -62,7 +69,8 @@
             // 
             this.remoteToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miRemoteConnectionSettings,
-            this.miRemoteConnect});
+            this.miRemoteConnect,
+            this.miJeromeSetup});
             this.remoteToolStripMenuItem.Name = "remoteToolStripMenuItem";
             this.remoteToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
             this.remoteToolStripMenuItem.Text = "Пульт";
@@ -80,6 +88,29 @@
             this.miRemoteConnect.Size = new System.Drawing.Size(202, 22);
             this.miRemoteConnect.Text = "Подключиться";
             this.miRemoteConnect.Click += new System.EventHandler(this.miRemoteConnect_Click);
+            // 
+            // miAntennaes
+            // 
+            this.miAntennaes.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.miAntennaeConnectionSettings,
+            this.miAntennaeConnect});
+            this.miAntennaes.Name = "miAntennaes";
+            this.miAntennaes.Size = new System.Drawing.Size(68, 20);
+            this.miAntennaes.Text = "Антенны";
+            // 
+            // miAntennaeConnectionSettings
+            // 
+            this.miAntennaeConnectionSettings.Name = "miAntennaeConnectionSettings";
+            this.miAntennaeConnectionSettings.Size = new System.Drawing.Size(202, 22);
+            this.miAntennaeConnectionSettings.Text = "Настройки соединения";
+            this.miAntennaeConnectionSettings.Click += new System.EventHandler(this.miAntennaeConnectionSettings_Click);
+            // 
+            // miAntennaeConnect
+            // 
+            this.miAntennaeConnect.Name = "miAntennaeConnect";
+            this.miAntennaeConnect.Size = new System.Drawing.Size(202, 22);
+            this.miAntennaeConnect.Text = "Подключиться";
+            this.miAntennaeConnect.Click += new System.EventHandler(this.miAntennaeConnect_Click);
             // 
             // miTune
             // 
@@ -104,6 +135,29 @@
             this.pTuning.Name = "pTuning";
             this.pTuning.Size = new System.Drawing.Size(275, 378);
             this.pTuning.TabIndex = 1;
+            // 
+            // bCancel
+            // 
+            this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bCancel.Location = new System.Drawing.Point(178, 347);
+            this.bCancel.Name = "bCancel";
+            this.bCancel.Size = new System.Drawing.Size(94, 28);
+            this.bCancel.TabIndex = 7;
+            this.bCancel.Text = "Отмена";
+            this.bCancel.UseVisualStyleBackColor = true;
+            this.bCancel.Click += new System.EventHandler(this.bCancel_Click);
+            // 
+            // bSave
+            // 
+            this.bSave.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.bSave.Location = new System.Drawing.Point(4, 347);
+            this.bSave.Name = "bSave";
+            this.bSave.Size = new System.Drawing.Size(168, 28);
+            this.bSave.TabIndex = 2;
+            this.bSave.Text = "Сохранить";
+            this.bSave.UseVisualStyleBackColor = true;
+            this.bSave.Click += new System.EventHandler(this.bSave_Click);
             // 
             // lAntTitle
             // 
@@ -176,34 +230,40 @@
             this.lD.Text = "D";
             this.lD.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // bSave
+            // lRemoteDisconnect
             // 
-            this.bSave.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.bSave.Location = new System.Drawing.Point(4, 347);
-            this.bSave.Name = "bSave";
-            this.bSave.Size = new System.Drawing.Size(168, 28);
-            this.bSave.TabIndex = 2;
-            this.bSave.Text = "Сохранить";
-            this.bSave.UseVisualStyleBackColor = true;
-            this.bSave.Click += new System.EventHandler(this.bSave_Click);
+            this.lRemoteDisconnect.AutoSize = true;
+            this.lRemoteDisconnect.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.lRemoteDisconnect.Location = new System.Drawing.Point(65, 108);
+            this.lRemoteDisconnect.Name = "lRemoteDisconnect";
+            this.lRemoteDisconnect.Size = new System.Drawing.Size(138, 20);
+            this.lRemoteDisconnect.TabIndex = 2;
+            this.lRemoteDisconnect.Text = "Пульт: нет связи";
             // 
-            // bCancel
+            // lAntennaeDisconnect
             // 
-            this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bCancel.Location = new System.Drawing.Point(178, 347);
-            this.bCancel.Name = "bCancel";
-            this.bCancel.Size = new System.Drawing.Size(94, 28);
-            this.bCancel.TabIndex = 7;
-            this.bCancel.Text = "Отмена";
-            this.bCancel.UseVisualStyleBackColor = true;
-            this.bCancel.Click += new System.EventHandler(this.bCancel_Click);
+            this.lAntennaeDisconnect.AutoSize = true;
+            this.lAntennaeDisconnect.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.lAntennaeDisconnect.Location = new System.Drawing.Point(55, 140);
+            this.lAntennaeDisconnect.Name = "lAntennaeDisconnect";
+            this.lAntennaeDisconnect.Size = new System.Drawing.Size(158, 20);
+            this.lAntennaeDisconnect.TabIndex = 3;
+            this.lAntennaeDisconnect.Text = "Антенны: нет связи";
+            // 
+            // miJeromeSetup
+            // 
+            this.miJeromeSetup.Name = "miJeromeSetup";
+            this.miJeromeSetup.Size = new System.Drawing.Size(202, 22);
+            this.miJeromeSetup.Text = "Настройки Jerome";
+            this.miJeromeSetup.Click += new System.EventHandler(this.miJeromeSetup_Click);
             // 
             // FMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(275, 402);
+            this.Controls.Add(this.lRemoteDisconnect);
+            this.Controls.Add(this.lAntennaeDisconnect);
             this.Controls.Add(this.pTuning);
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -238,6 +298,12 @@
         private System.Windows.Forms.Label lAntTitle;
         private System.Windows.Forms.Button bCancel;
         private System.Windows.Forms.Button bSave;
+        private System.Windows.Forms.ToolStripMenuItem miAntennaes;
+        private System.Windows.Forms.ToolStripMenuItem miAntennaeConnectionSettings;
+        private System.Windows.Forms.ToolStripMenuItem miAntennaeConnect;
+        private System.Windows.Forms.Label lRemoteDisconnect;
+        private System.Windows.Forms.Label lAntennaeDisconnect;
+        private System.Windows.Forms.ToolStripMenuItem miJeromeSetup;
     }
 }
 

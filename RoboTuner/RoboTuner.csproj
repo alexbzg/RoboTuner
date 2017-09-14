@@ -65,6 +65,12 @@
     <Compile Include="FMain.Designer.cs">
       <DependentUpon>FMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="FModuleSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FModuleSettings.designer.cs">
+      <DependentUpon>FModuleSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="InvokeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -83,6 +89,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FMain.resx">
       <DependentUpon>FMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FModuleSettings.resx">
+      <DependentUpon>FModuleSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

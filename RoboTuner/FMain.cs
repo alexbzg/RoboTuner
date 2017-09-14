@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using XmlConfigNS;
+using JeromeModuleSettings;
 
 namespace RoboTuner
 {
@@ -24,7 +25,7 @@ namespace RoboTuner
             { "N", new int[] { 60, 240 } },
             { "S", new int[] { 60, 240 } },
         };
-        static readonly ControllerTemplate controllerTemplate = new ControllerTemplate()
+        static readonly RemoteControllerTemplate remoteControllerTemplate = new RemoteControllerTemplate()
         {
             encoders = new EncoderTemplate[] {
                 new EncoderTemplate()
@@ -38,11 +39,17 @@ namespace RoboTuner
 
             }
         };
+        static readonly AntennaeControllerTemplate antennaeControllerTemplate = new AntennaeControllerTemplate()
+        {
+            trLine = 14
+        };
+        
 
         JeromeController remoteCtrl;
+        JeromeController antennaeCtrl;
         Dictionary<int, EncoderLine> encoderLines = new Dictionary<int, EncoderLine>();
         Dictionary<int, AntFreqPanel> antFreqPanels = new Dictionary<int, AntFreqPanel>();
-        EncoderControl[] encoders = new EncoderControl[controllerTemplate.encoders.Length];
+        EncoderControl[] encoders = new EncoderControl[remoteControllerTemplate.encoders.Length];
         int currentFreq = 0;
         bool activeType = false;
         Color defColor;
@@ -77,6 +84,10 @@ namespace RoboTuner
                 connectRemoteCtrl();
             else
                 miRemoteConnect.Visible = false;
+            if (config.data.antennaeJeromeParams != null)
+                connectAntennaeCtrl();
+            else
+                miAntennaeConnect.Visible = false;
             tune(directions[0], angles[directions[0]][0]);
         }
 
@@ -136,7 +147,7 @@ namespace RoboTuner
         {
             remoteCtrl = JeromeController.create( config.data.remoteJeromeParams );
             int encC = 0;
-            foreach (EncoderTemplate encT in controllerTemplate.encoders)
+            foreach (EncoderTemplate encT in remoteControllerTemplate.encoders)
             {
                 EncoderControl enc = new EncoderControl(remoteCtrl, encT);
                 encoders[encC] = enc;
@@ -162,12 +173,50 @@ namespace RoboTuner
             miRemoteConnect.Text = "Отключиться";
         }
 
+        private void connectAntennaeCtrl()
+        {
+            antennaeCtrl = JeromeController.create(config.data.antennaeJeromeParams);
+            antennaeCtrl.usartBinaryMode = true;
+            antennaeCtrl.onConnected += antennaeConnected;
+            antennaeCtrl.onDisconnected += antennaeDisconnected;
+            antennaeCtrl.asyncConnect();
+            miAntennaeConnectionSettings.Visible = false;
+            miAntennaeConnect.Text = "Отключиться";
+        }
+
+        private void antennaeDisconnected(object sender, AsyncConnectionNS.DisconnectEventArgs e)
+        {
+            DoInvoke(() =>
+            {
+                processConnections();
+                lAntennaeDisconnect.Visible = true;
+            });
+        }
+
+        private void antennaeConnected(object sender, EventArgs e)
+        {
+            antennaeCtrl.setLineMode(antennaeControllerTemplate.trLine, "out");
+            antennaeCtrl.switchLine(antennaeControllerTemplate.trLine, 1);
+            DoInvoke(() =>
+            {
+                processConnections();
+                lAntennaeDisconnect.Visible = false;
+            });
+        }
+
+        private void processConnections()
+        {
+            bool cs = (antennaeCtrl != null && antennaeCtrl.connected && remoteCtrl != null && remoteCtrl.connected);
+            pTuning.Enabled = cs;
+            miTune.Enabled = cs;
+        }
+
         private void remoteDisconnected(object sender, AsyncConnectionNS.DisconnectEventArgs e)
         {
             DoInvoke(() =>
            {
-               Text = "RoboTuner - Нет соединения с пультом";
-               pTuning.Enabled = false;
+               processConnections();
+               lRemoteDisconnect.Visible = true;
            });
         }
 
@@ -219,8 +268,8 @@ namespace RoboTuner
             remoteCtrl.readlines();
             DoInvoke(() =>
            {
-               Text = "RoboTuner";
-               pTuning.Enabled = true;
+               processConnections();
+               lRemoteDisconnect.Visible = false;
            });
         }
 
@@ -231,6 +280,7 @@ namespace RoboTuner
             {
                 wasNull = true;
                 config.data.remoteJeromeParams = new JeromeConnectionParams();
+                config.data.remoteJeromeParams.usartPort = 0;
             }
             if (config.data.remoteJeromeParams.edit())
                 config.write();
@@ -286,6 +336,22 @@ namespace RoboTuner
             miRemoteConnectionSettings.Visible = true;
         }
 
+        private void disconnectAntennaeCtrl()
+        {
+            if (antennaeCtrl != null)
+            {
+                if (antennaeCtrl.active)
+                    antennaeCtrl.disconnect();
+                antennaeCtrl.onConnected -= remoteConnected;
+                antennaeCtrl.lineStateChanged -= remoteLineStateChanged;
+                antennaeCtrl.onDisconnected -= remoteDisconnected;
+                antennaeCtrl = null;
+            }
+            miAntennaeConnect.Text = "Подключиться";
+            miAntennaeConnectionSettings.Visible = true;
+        }
+
+
         private void bSave_Click(object sender, EventArgs e)
         {
             AntFreqSettings storedAFS = config.data.getFreqSettings(currentDir, currentAngle, currentFreq);
@@ -315,6 +381,38 @@ namespace RoboTuner
         private void bCancel_Click(object sender, EventArgs e)
         {
             setCurrentFreq(currentFreq);
+        }
+
+
+        private void miAntennaeConnectionSettings_Click(object sender, EventArgs e)
+        {
+            bool wasNull = false;
+            if (config.data.antennaeJeromeParams == null)
+            {
+                wasNull = true;
+                config.data.antennaeJeromeParams = new JeromeConnectionParams();
+            }
+            if (config.data.antennaeJeromeParams.edit())
+                config.write();
+            else if (wasNull)
+                config.data.antennaeJeromeParams = null;
+            miAntennaeConnect.Visible = config.data.antennaeJeromeParams != null;
+
+
+        }
+
+        private void miAntennaeConnect_Click(object sender, EventArgs e)
+        {
+            if (antennaeCtrl != null && antennaeCtrl.active)
+                disconnectAntennaeCtrl();
+            else
+                connectAntennaeCtrl();
+        }
+
+        private void miJeromeSetup_Click(object sender, EventArgs e)
+        {
+            fModuleSettings fms = new fModuleSettings();
+            fms.ShowDialog();
         }
     }
 
@@ -358,9 +456,14 @@ namespace RoboTuner
         public int[] lines;
     }
 
-    public class ControllerTemplate
+    public class RemoteControllerTemplate
     {
         public EncoderTemplate[] encoders;
+    }
+
+    public class AntennaeControllerTemplate
+    {
+        public int trLine;
     }
 
     public class AntFreqSettings
@@ -388,6 +491,7 @@ namespace RoboTuner
     public class RoboTunerConfig: StorableFormConfig
     {
         public JeromeConnectionParams remoteJeromeParams;
+        public JeromeConnectionParams antennaeJeromeParams;
         public List<AntSettings> antennaeSettings = new List<AntSettings>();
 
         public AntFreqSettings getFreqSettings(string dir, int angle, int freq )
