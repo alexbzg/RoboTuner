@@ -15,7 +15,7 @@ namespace RoboTuner
         private int _freq;
         private bool _active = false;
         public event EventHandler activated;
-        private Dictionary<string, Label> labels;
+        private Label[] labels;
         private Color defColor;
         public bool active => _active;
         public int freq => _freq;
@@ -27,17 +27,15 @@ namespace RoboTuner
         }
 
 
-        public void setCaption( string type, int val)
+        public void setCaption( int type, int val)
         {
             labels[type].Text = val.ToString();
         }
 
         public void setAllCaptions( AntFreqSettings settings)
         {
-            setCaption("D", settings.D);
-            setCaption("R", settings.R);
-            setCaption("L", settings.L);
-            setCaption("C", settings.C);
+            for ( int c = 0; c < settings.motors.Length; c++)
+                setCaption(c, settings.motors[c]);
         }
 
         public AntFreqPanel( int freq )
@@ -45,9 +43,9 @@ namespace RoboTuner
             _freq = freq;
             InitializeComponent();
             lFreq.Text = _freq.ToString();
-            labels = new Dictionary<string, Label>()
+            labels = new Label[]
             {
-                { "D", lD }, { "R", lR }, { "L", lL }, { "C", lC }
+                lD, lR, lL, lC
             };
             defColor = ForeColor;
             foreach (Control c in Controls)

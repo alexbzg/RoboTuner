@@ -25,6 +25,134 @@ namespace RoboTuner
             { "N", new int[] { 60, 240 } },
             { "S", new int[] { 60, 240 } },
         };
+        public static readonly int motorCount = 4;
+        public static readonly byte mcCount = 8;
+        static readonly Dictionary<string, MCData> mcData = new Dictionary<string, MCData>
+        {
+            {
+                "E", new MCData()
+                {
+                    aux = new MCAngle() {
+                        relays = new MCElem[] { new MCElem() { mc = 0, elem = 2 }, new MCElem() { mc = 1, elem = 0 }, new MCElem() { mc = 2, elem = 2 }  },
+                        motors = new MCElem[] { new MCElem() { mc = 1, elem = 1 }, new MCElem() { mc = 1, elem = 0 } }
+                    },
+                    angles = new Dictionary<int, MCAngle> {
+                        { 330, new MCAngle()
+                            {
+                                relays = new MCElem[] { new MCElem() { mc = 0, elem = 0 }, new MCElem() { mc = 2, elem = 1 } },
+                                motors = new MCElem[]
+                                {
+                                    new MCElem() { mc = 0, elem = 0 }, new MCElem() { mc = 2, elem = 1 }
+                                }
+                            }
+                        },
+                        { 150, new MCAngle()
+                            {
+                                relays = new MCElem[] { new MCElem() { mc = 2, elem = 0 }, new MCElem() { mc = 0, elem = 1 } },
+                                motors = new MCElem[]
+                                {
+                                    new MCElem() { mc = 2, elem = 0 }, new MCElem() { mc = 0, elem = 1 }
+                                }
+                            }
+                        },
+
+                    }
+                }
+            },
+            {
+                "W", new MCData()
+                {
+                    aux = new MCAngle() {
+                        relays = new MCElem[] { new MCElem() { mc = 6, elem = 2 }, new MCElem() { mc = 5, elem = 0 }, new MCElem() { mc = 4, elem = 2 }  },
+                        motors = new MCElem[] { new MCElem() { mc = 5, elem = 0 }, new MCElem() { mc = 5, elem = 1 } }
+                    },
+                    angles = new Dictionary<int, MCAngle> {
+                        { 330, new MCAngle()
+                            {
+                                relays = new MCElem[] { new MCElem() { mc = 6, elem = 0 }, new MCElem() { mc = 4, elem = 1 } },
+                                motors = new MCElem[]
+                                {
+                                    new MCElem() { mc = 6, elem = 1 }, new MCElem() { mc = 4, elem = 1 }
+                                }
+                            }
+                        },
+                        { 150, new MCAngle()
+                            {
+                                relays = new MCElem[] { new MCElem() { mc = 4, elem = 0 }, new MCElem() { mc = 6, elem = 1 } },
+                                motors = new MCElem[]
+                                {
+                                    new MCElem() { mc = 4, elem = 0 }, new MCElem() { mc = 6, elem = 0 }
+                                }
+                            }
+                        },
+
+                    }
+                }
+            },
+            {
+                "N", new MCData()
+                {
+                    aux = new MCAngle() {
+                        relays = new MCElem[] { new MCElem() { mc = 6, elem = 2 }, new MCElem() { mc = 7, elem = 0 }, new MCElem() { mc = 0, elem = 2 }  },
+                        motors = new MCElem[] { new MCElem() { mc = 7, elem = 1 }, new MCElem() { mc = 7, elem = 0 } }
+                    },
+                    angles = new Dictionary<int, MCAngle> {
+                        { 60, new MCAngle()
+                            {
+                                relays = new MCElem[] { new MCElem() { mc = 0, elem = 0 }, new MCElem() { mc = 6, elem = 1 } },
+                                motors = new MCElem[]
+                                {
+                                    new MCElem() { mc = 0, elem = 0 }, new MCElem() { mc = 6, elem = 0 }
+                                }
+                            }
+                        },
+                        { 240, new MCAngle()
+                            {
+                                relays = new MCElem[] { new MCElem() { mc = 6, elem = 0 }, new MCElem() { mc = 0, elem = 1 } },
+                                motors = new MCElem[]
+                                {
+                                    new MCElem() { mc = 6, elem = 1 }, new MCElem() { mc = 0, elem = 1 }
+                                }
+                            }
+                        },
+
+                    }
+                }
+            },
+            {
+                "S", new MCData()
+                {
+                    aux = new MCAngle() {
+                        relays = new MCElem[] { new MCElem() { mc = 2, elem = 2 }, new MCElem() { mc = 3, elem = 0 }, new MCElem() { mc = 4, elem = 2 }  },
+                        motors = new MCElem[] { new MCElem() { mc = 3, elem = 0 }, new MCElem() { mc = 3, elem = 1 } }
+                    },
+                    angles = new Dictionary<int, MCAngle> {
+                        { 60, new MCAngle()
+                            {
+                                relays = new MCElem[] { new MCElem() { mc = 2, elem = 0 }, new MCElem() { mc = 4, elem = 1 } },
+                                motors = new MCElem[]
+                                {
+                                    new MCElem() { mc = 2, elem = 0 }, new MCElem() { mc = 4, elem = 1 }
+                                }
+                            }
+                        },
+                        { 240, new MCAngle()
+                            {
+                                relays = new MCElem[] { new MCElem() { mc = 4, elem = 0 }, new MCElem() { mc = 2, elem = 1 } },
+                                motors = new MCElem[]
+                                {
+                                    new MCElem() { mc = 4, elem = 0 }, new MCElem() { mc = 2, elem = 1 }
+                                }
+                            }
+                        },
+
+                    }
+                }
+            }
+
+
+
+        };
         static readonly RemoteControllerTemplate remoteControllerTemplate = new RemoteControllerTemplate()
         {
             encoders = new EncoderTemplate[] {
@@ -99,12 +227,9 @@ namespace RoboTuner
             AntFreqSettings storedAFS = config.data.getFreqSettings( currentDir, currentAngle, freq );
             curFreqSettings = new AntFreqSettings()
             {
-                freq = freq,
-                D = storedAFS.D,
-                R = storedAFS.R,
-                L = storedAFS.L,
-                C = storedAFS.C
+                freq = freq
             };
+            Array.Copy(storedAFS.motors, curFreqSettings.motors, motorCount);
             AntFreqPanel afp = antFreqPanels[currentFreq];
             afp.setAllCaptions(curFreqSettings);
             if (!afp.active)
@@ -222,35 +347,24 @@ namespace RoboTuner
 
         private void encValueChange(int encC, EncoderRotatedEventArgs e)
         {
+            int motorNo = encC;
+            if (!activeType)
+                motorNo += 2;
+            curFreqSettings.motors[motorNo] += e.value;
             DoInvoke(() =>
           {
-              string cptType;
-              if (activeType)
-              {
-                  if (encC == 0)
-                  {
-                      curFreqSettings.D += e.value;
-                      antFreqPanels[currentFreq].setCaption("D", curFreqSettings.D);
-                  }
-                  else
-                  {
-                      curFreqSettings.R += e.value;
-                      antFreqPanels[currentFreq].setCaption("R", curFreqSettings.R);
-                  }
-              } else
-              {
-                  if (encC == 0)
-                  {
-                      curFreqSettings.L += e.value;
-                      antFreqPanels[currentFreq].setCaption("L", curFreqSettings.L);
-                  }
-                  else
-                  {
-                      curFreqSettings.C += e.value;
-                      antFreqPanels[currentFreq].setCaption("C", curFreqSettings.C);
-                  }
-              }
+                antFreqPanels[currentFreq].setCaption(motorNo, curFreqSettings.motors[motorNo]);
           });
+            MCElem mce = getMCAngle().motors[encC];
+            int data = mce.mc << 7 + mce.elem << 2;
+            int val = e.value;
+            if ( val < 0)
+            {
+                data += 1 << 1;
+                val = -val;
+            }
+            for (int c = 0; c < val; c++)
+                antennaeCtrlSignal(data);
         }
 
         private void remoteLineStateChanged(object sender, LineStateChangedEventArgs e)
@@ -318,7 +432,26 @@ namespace RoboTuner
                     lAux.ForeColor = Color.Red;
                 }
                 activeType = type;
+                MCElem[] relays = getMCAngle().relays;
+                for (byte mc = 0; mc < mcCount; mc++)
+                {
+                    int data = mc << 7 + 1 << 6;
+                    for (int rc = 0; rc < relays.Length; rc++)
+                        if (relays[rc].mc == mc)
+                            data += 1 << (3 + relays[rc].elem);
+                    antennaeCtrlSignal(data);
+                }
             }
+        }
+
+        private void antennaeCtrlSignal( int data )
+        {
+            antennaeCtrl.usartSendBytes(BitConverter.GetBytes(data));
+        }
+
+        public MCAngle getMCAngle()
+        {
+            return (activeType ? mcData[currentDir].angles[currentAngle] : mcData[currentDir].aux);
         }
 
         private void disconnectRemoteCtrl()
@@ -355,10 +488,7 @@ namespace RoboTuner
         private void bSave_Click(object sender, EventArgs e)
         {
             AntFreqSettings storedAFS = config.data.getFreqSettings(currentDir, currentAngle, currentFreq);
-            storedAFS.D = curFreqSettings.D;
-            storedAFS.R = curFreqSettings.R;
-            storedAFS.L = curFreqSettings.L;
-            storedAFS.C = curFreqSettings.C;
+            Array.Copy( curFreqSettings.motors, storedAFS.motors, storedAFS.motors.Length );
             writeConfig();
             if (currentFreq < freqStart + freqStep * (freqCount - 1))
                 setCurrentFreq(currentFreq + freqStep);
@@ -469,10 +599,7 @@ namespace RoboTuner
     public class AntFreqSettings
     {
         public int freq;
-        public int D;
-        public int R;
-        public int L;
-        public int C;
+        public int[] motors = new int[FMain.motorCount];
     }
 
     public class AntID
@@ -487,6 +614,25 @@ namespace RoboTuner
         public List<AntFreqSettings> settings = new List<AntFreqSettings>();
 
     }
+
+    public class MCElem
+    {
+        public int mc;
+        public int elem;
+    }
+
+    public class MCAngle
+    {
+        public MCElem[] relays;
+        public MCElem[] motors;
+    }
+
+    public class MCData
+    {
+        public MCAngle aux;
+        public Dictionary<int, MCAngle> angles;
+    }
+
 
     public class RoboTunerConfig: StorableFormConfig
     {
