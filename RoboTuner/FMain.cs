@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using XmlConfigNS;
 using JeromeModuleSettings;
+using System.Threading;
+
 
 namespace RoboTuner
 {
@@ -184,6 +186,7 @@ namespace RoboTuner
         string currentDir;
         int currentAngle;
         AntFreqSettings curFreqSettings;
+        System.Threading.Timer antennaePingTimer;
 
         public FMain()
         {
@@ -217,6 +220,15 @@ namespace RoboTuner
             else
                 miAntennaeConnect.Visible = false;
             tune(directions[0], angles[directions[0]][0]);
+            antennaePingTimer = new System.Threading.Timer(obj => pingAntennae(), null, 1000, 1000);
+        }
+
+        private void pingAntennae()
+        {
+            if ( antennaeCtrl != null && antennaeCtrl.connected)
+                for (int c = 0; c < mcCount; c++)
+                    antennaeCtrlSignal(c << 7);
+
         }
 
         private void setCurrentFreq( int freq )
