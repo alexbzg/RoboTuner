@@ -220,14 +220,14 @@ namespace RoboTuner
             else
                 miAntennaeConnect.Visible = false;
             tune(directions[0], angles[directions[0]][0]);
-            antennaePingTimer = new System.Threading.Timer(obj => pingAntennae(), null, 1000, 1000);
+            //antennaePingTimer = new System.Threading.Timer(obj => pingAntennae(), null, 1000, 1000);
         }
 
         private void pingAntennae()
         {
             if ( antennaeCtrl != null && antennaeCtrl.connected)
                 for (int c = 0; c < mcCount; c++)
-                    antennaeCtrlSignal(c << 7);
+                    antennaeCmd(c, "", 0);
 
         }
 
@@ -262,6 +262,7 @@ namespace RoboTuner
                 afp.setAllCaptions(freqSettings);
             }
             antFreqPanels[freqStart].activate();
+            setRelays();
         }
 
         private void createTuneMenuItem( string dir )
@@ -339,6 +340,7 @@ namespace RoboTuner
                 processConnections();
                 lAntennaeDisconnect.Visible = false;
             });
+            setRelays();
         }
 
         private void processConnections()
@@ -368,15 +370,15 @@ namespace RoboTuner
                 antFreqPanels[currentFreq].setCaption(motorNo, curFreqSettings.motors[motorNo]);
           });
             MCElem mce = getMCAngle().motors[encC];
-            int data = mce.mc << 7 + mce.elem << 2;
             int val = e.value;
+            int dir = 0;
             if ( val < 0)
             {
-                data += 1 << 1;
+                dir = 1;
                 val = -val;
             }
             for (int c = 0; c < val; c++)
-                antennaeCtrlSignal(data);
+                antennaeCmd(mce.mc, "motor", (mce.elem << 1) + dir);
         }
 
         private void remoteLineStateChanged(object sender, LineStateChangedEventArgs e)
@@ -444,21 +446,35 @@ namespace RoboTuner
                     lAux.ForeColor = Color.Red;
                 }
                 activeType = type;
-                MCElem[] relays = getMCAngle().relays;
-                for (byte mc = 0; mc < mcCount; mc++)
-                {
-                    int data = mc << 7 + 1 << 6;
-                    for (int rc = 0; rc < relays.Length; rc++)
-                        if (relays[rc].mc == mc)
-                            data += 1 << (3 + relays[rc].elem);
-                    antennaeCtrlSignal(data);
-                }
+                setRelays();
             }
         }
 
-        private void antennaeCtrlSignal( int data )
+        private void setRelays()
         {
+            MCElem[] relays = getMCAngle().relays;
+            for (byte mc = 0; mc < mcCount; mc++)
+            {
+                int args = 0;
+                for (int rc = 0; rc < relays.Length; rc++)
+                    if (relays[rc].mc == mc)
+                        args += 1 << relays[rc].elem;
+                antennaeCmd(mc, "relays", args);
+            }
+        }
+
+        private void antennaeCmd( int mc, string cmd, int args )
+        {
+            int data = mc << 5;
+            if (cmd == "relays")
+                data += 1 << 3;
+            else if (cmd == "motor")
+                data += 2 << 3;
+            data += args;
             antennaeCtrl.usartSendBytes(BitConverter.GetBytes(data));
+            if (data == 0)
+                data = 1;
+            System.Diagnostics.Debug.WriteLine(data.ToString());
         }
 
         public MCAngle getMCAngle()
