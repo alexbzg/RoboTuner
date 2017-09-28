@@ -27,8 +27,8 @@ namespace RoboTuner
             { "N", new int[] { 60, 240 } },
             { "S", new int[] { 60, 240 } },
         };
-        public static readonly int motorCount = 4;
-        public static readonly byte mcCount = 8;
+        public const int motorCount = 4;
+        public const byte mcCount = 8;
         static readonly Dictionary<string, MCData> mcData = new Dictionary<string, MCData>
         {
             {
@@ -187,6 +187,7 @@ namespace RoboTuner
         int currentAngle;
         AntFreqSettings curFreqSettings;
         System.Threading.Timer antennaePingTimer;
+        MotorState[] motorsState = new MotorState[mcCount];
 
         public FMain()
         {
@@ -317,9 +318,33 @@ namespace RoboTuner
             antennaeCtrl.usartBinaryMode = true;
             antennaeCtrl.onConnected += antennaeConnected;
             antennaeCtrl.onDisconnected += antennaeDisconnected;
+            antennaeCtrl.usartBytesReceived += antennaeBytesReceived;
             antennaeCtrl.asyncConnect();
             miAntennaeConnectionSettings.Visible = false;
             miAntennaeConnect.Text = "Отключиться";
+        }
+
+        private void antennaeBytesReceived(object sender, AsyncConnectionNS.BytesReceivedEventArgs e)
+        {
+            foreach (byte b in e.bytes)
+            {
+                if (b == 0)
+                    continue;
+                int mc = b | (7 << 5);
+                int data = b - mc;
+                if (data != 31)
+                    data--;
+                mc = mc >> 5;
+                MotorState ms = motorsState[mc];
+                ms.buf += data << (5 * (ms.rcvd % 2));          
+                if (++ms.rcvd % 2 == 0)
+                {
+                    ms.positions[ms.rcvd / 2] = ms.buf;
+                    ms.buf = 0;
+                    if (ms.rcvd == 4)
+                        ms.rcvd = 0;
+                }
+            }
         }
 
         private void antennaeDisconnected(object sender, AsyncConnectionNS.DisconnectEventArgs e)
@@ -572,6 +597,7 @@ namespace RoboTuner
             fModuleSettings fms = new fModuleSettings();
             fms.ShowDialog();
         }
+
     }
 
     public class EncoderRotatedEventArgs : EventArgs
@@ -661,6 +687,12 @@ namespace RoboTuner
         public Dictionary<int, MCAngle> angles;
     }
 
+    public class MotorState
+    {
+        public int[] positions = new int[] { -1, -1 };
+        public int rcvd = 0;
+        public int buf = 0;
+    }
 
     public class RoboTunerConfig: StorableFormConfig
     {

@@ -32,6 +32,7 @@
             this.remoteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.miRemoteConnectionSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.miRemoteConnect = new System.Windows.Forms.ToolStripMenuItem();
+            this.miJeromeSetup = new System.Windows.Forms.ToolStripMenuItem();
             this.miAntennaes = new System.Windows.Forms.ToolStripMenuItem();
             this.miAntennaeConnectionSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.miAntennaeConnect = new System.Windows.Forms.ToolStripMenuItem();
@@ -48,13 +49,13 @@
             this.lD = new System.Windows.Forms.Label();
             this.lRemoteDisconnect = new System.Windows.Forms.Label();
             this.lAntennaeDisconnect = new System.Windows.Forms.Label();
-            this.miJeromeSetup = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.pTuning.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
+            this.menuStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.remoteToolStripMenuItem,
             this.miAntennaes,
@@ -88,6 +89,13 @@
             this.miRemoteConnect.Size = new System.Drawing.Size(202, 22);
             this.miRemoteConnect.Text = "Подключиться";
             this.miRemoteConnect.Click += new System.EventHandler(this.miRemoteConnect_Click);
+            // 
+            // miJeromeSetup
+            // 
+            this.miJeromeSetup.Name = "miJeromeSetup";
+            this.miJeromeSetup.Size = new System.Drawing.Size(202, 22);
+            this.miJeromeSetup.Text = "Настройки Jerome";
+            this.miJeromeSetup.Click += new System.EventHandler(this.miJeromeSetup_Click);
             // 
             // miAntennaes
             // 
@@ -129,7 +137,6 @@
             this.pTuning.Controls.Add(this.lAux);
             this.pTuning.Controls.Add(this.lAngle);
             this.pTuning.Controls.Add(this.lD);
-            this.pTuning.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pTuning.Enabled = false;
             this.pTuning.Location = new System.Drawing.Point(0, 24);
             this.pTuning.Name = "pTuning";
@@ -151,7 +158,7 @@
             // 
             this.bSave.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.bSave.Location = new System.Drawing.Point(4, 347);
+            this.bSave.Location = new System.Drawing.Point(5, 347);
             this.bSave.Name = "bSave";
             this.bSave.Size = new System.Drawing.Size(168, 28);
             this.bSave.TabIndex = 2;
@@ -250,22 +257,12 @@
             this.lAntennaeDisconnect.TabIndex = 3;
             this.lAntennaeDisconnect.Text = "Антенны: нет связи";
             // 
-            // miJeromeSetup
-            // 
-            this.miJeromeSetup.Name = "miJeromeSetup";
-            this.miJeromeSetup.Size = new System.Drawing.Size(202, 22);
-            this.miJeromeSetup.Text = "Настройки Jerome";
-            this.miJeromeSetup.Click += new System.EventHandler(this.miJeromeSetup_Click);
-            // 
             // FMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(275, 402);
-            this.Controls.Add(this.lRemoteDisconnect);
-            this.Controls.Add(this.lAntennaeDisconnect);
-            this.Controls.Add(this.pTuning);
-            this.Controls.Add(this.menuStrip1);
+            this.ClientSize = new System.Drawing.Size(275, 433);
+            this.Controls.Add(this.toolStripContainer1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MainMenuStrip = this.menuStrip1;
@@ -277,7 +274,6 @@
             this.menuStrip1.PerformLayout();
             this.pTuning.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -304,6 +300,7 @@
         private System.Windows.Forms.Label lRemoteDisconnect;
         private System.Windows.Forms.Label lAntennaeDisconnect;
         private System.Windows.Forms.ToolStripMenuItem miJeromeSetup;
+        private System.Windows.Forms.ToolStripContainer toolStripContainer1;
     }
 }
 
