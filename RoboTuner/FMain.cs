@@ -228,7 +228,7 @@ namespace RoboTuner
         {
             if ( antennaeCtrl != null && antennaeCtrl.connected)
                 for (int c = 0; c < mcCount; c++)
-                    antennaeCmd(c, "", 0);
+                    antennaeCmd(c, "", 0, 0);
 
         }
 
@@ -330,19 +330,20 @@ namespace RoboTuner
             {
                 if (b == 0)
                     continue;
-                int mc = b | (7 << 5);
-                int data = b - mc;
-                if (data != 31)
-                    data--;
-                mc = mc >> 5;
+                int mc = ( b | (7 << 5) ) >> 5;
                 MotorState ms = motorsState[mc];
-                ms.buf += data << (5 * (ms.rcvd % 2));          
-                if (++ms.rcvd % 2 == 0)
+                if ( ++ms.rcvd % 2 == 1)
+                    ms.buf += b | 15;          
+                else 
                 {
+                    ms.buf += (b | 31) - 1;
                     ms.positions[ms.rcvd / 2] = ms.buf;
                     ms.buf = 0;
                     if (ms.rcvd == 4)
+                    {
                         ms.rcvd = 0;
+                        ms.updated = true;
+                    }
                 }
             }
         }
@@ -395,15 +396,7 @@ namespace RoboTuner
                 antFreqPanels[currentFreq].setCaption(motorNo, curFreqSettings.motors[motorNo]);
           });
             MCElem mce = getMCAngle().motors[encC];
-            int val = e.value;
-            int dir = 0;
-            if ( val < 0)
-            {
-                dir = 1;
-                val = -val;
-            }
-            for (int c = 0; c < val; c++)
-                antennaeCmd(mce.mc, "motor", (mce.elem << 1) + dir);
+            antennaeCmd(mce.mc, "motor", mce.elem, curFreqSettings.motors[motorNo]);
         }
 
         private void remoteLineStateChanged(object sender, LineStateChangedEventArgs e)
@@ -480,26 +473,34 @@ namespace RoboTuner
             MCElem[] relays = getMCAngle().relays;
             for (byte mc = 0; mc < mcCount; mc++)
             {
-                int args = 0;
-                for (int rc = 0; rc < relays.Length; rc++)
+                byte args = 0;
+                for (byte rc = 0; rc < relays.Length; rc++)
                     if (relays[rc].mc == mc)
-                        args += 1 << relays[rc].elem;
-                antennaeCmd(mc, "relays", args);
+                        args += Convert.ToByte( 1 << relays[rc].elem );
+                antennaeCmd(mc, "relays", args, 0);
             }
         }
 
-        private void antennaeCmd( int mc, string cmd, int args )
+
+        private void antennaeCmd( int mc, string cmd, byte args, int extraArgs )
         {
-            int data = mc << 5;
+            byte mcID = Convert.ToByte(mc << 5);
+            byte data = mcID;
             if (cmd == "relays")
                 data += 1 << 3;
             else if (cmd == "motor")
                 data += 2 << 3;
             data += args;
-            antennaeCtrl.usartSendBytes(BitConverter.GetBytes(data));
+            antennaeCtrl.usartSendBytes(new byte[] { data });
             if (data == 0)
                 data = 1;
             System.Diagnostics.Debug.WriteLine(data.ToString());
+            if ( extraArgs != 0 )
+            {
+                byte hi = Convert.ToByte((extraArgs | (31 << 5)) >> 5 + 1 + mcID);
+                byte lo = Convert.ToByte(extraArgs | 31 + 32 + mcID);
+                antennaeCtrl.usartSendBytes(new byte[] { hi, lo });
+            }
         }
 
         public MCAngle getMCAngle()
@@ -671,8 +672,8 @@ namespace RoboTuner
 
     public class MCElem
     {
-        public int mc;
-        public int elem;
+        public byte mc;
+        public byte elem;
     }
 
     public class MCAngle
@@ -692,6 +693,7 @@ namespace RoboTuner
         public int[] positions = new int[] { -1, -1 };
         public int rcvd = 0;
         public int buf = 0;
+        public bool updated = false;
     }
 
     public class RoboTunerConfig: StorableFormConfig
