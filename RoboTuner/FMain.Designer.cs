@@ -62,7 +62,7 @@
             this.miTune});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(275, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(206, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -140,13 +140,13 @@
             this.pTuning.Enabled = false;
             this.pTuning.Location = new System.Drawing.Point(0, 24);
             this.pTuning.Name = "pTuning";
-            this.pTuning.Size = new System.Drawing.Size(275, 378);
+            this.pTuning.Size = new System.Drawing.Size(275, 446);
             this.pTuning.TabIndex = 1;
             // 
             // bCancel
             // 
             this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bCancel.Location = new System.Drawing.Point(178, 347);
+            this.bCancel.Location = new System.Drawing.Point(178, 415);
             this.bCancel.Name = "bCancel";
             this.bCancel.Size = new System.Drawing.Size(94, 28);
             this.bCancel.TabIndex = 7;
@@ -158,7 +158,7 @@
             // 
             this.bSave.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.bSave.Location = new System.Drawing.Point(5, 347);
+            this.bSave.Location = new System.Drawing.Point(5, 415);
             this.bSave.Name = "bSave";
             this.bSave.Size = new System.Drawing.Size(168, 28);
             this.bSave.TabIndex = 2;
@@ -261,8 +261,9 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(275, 433);
-            this.Controls.Add(this.toolStripContainer1);
+            this.ClientSize = new System.Drawing.Size(275, 524);
+            this.Controls.Add(this.pTuning);
+            this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MainMenuStrip = this.menuStrip1;
@@ -274,6 +275,7 @@
             this.menuStrip1.PerformLayout();
             this.pTuning.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 

@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using XmlConfigNS;
 using JeromeModuleSettings;
 using System.Threading;
-
+using System.Threading.Tasks;
 
 namespace RoboTuner
 {
@@ -188,6 +188,7 @@ namespace RoboTuner
         AntFreqSettings curFreqSettings;
         System.Threading.Timer antennaePingTimer;
         MotorState[] motorsState = new MotorState[mcCount];
+        SemaphoreSlim trSemaphore = new SemaphoreSlim(1);
 
         public FMain()
         {
@@ -221,15 +222,20 @@ namespace RoboTuner
             else
                 miAntennaeConnect.Visible = false;
             tune(directions[0], angles[directions[0]][0]);
-            //antennaePingTimer = new System.Threading.Timer(obj => pingAntennae(), null, 1000, 1000);
+            antennaePingTimer = new System.Threading.Timer(obj => pingAntennae(), null, 1000, 1000);
         }
 
-        private void pingAntennae()
+        private async void pingAntennae()
         {
+            if (antennaeCtrl == null || !antennaeCtrl.connected)
+                return;
+            await trSemaphore.WaitAsync().ConfigureAwait(false);
             if ( antennaeCtrl != null && antennaeCtrl.connected)
-                for (int c = 0; c < mcCount; c++)
-                    antennaeCmd(c, "", 0, 0);
-
+                for (byte c = 0; c < mcCount; c++)
+                    antennaeMsg(c, new byte[] { 0 } );
+            antennaeCtrl.switchLine(antennaeControllerTemplate.trLine, 0);
+            await Task.Delay(250);
+            trSemaphore.Release();
         }
 
         private void setCurrentFreq( int freq )
@@ -482,25 +488,36 @@ namespace RoboTuner
         }
 
 
-        private void antennaeCmd( int mc, string cmd, byte args, int extraArgs )
+        private async void antennaeCmd( byte mc, string cmd, byte args, int extraArgs )
         {
-            byte mcID = Convert.ToByte(mc << 5);
-            byte data = mcID;
+            byte[] data = new byte[extraArgs == 0 ? 1 : 3];
+            data[0] = 0;
             if (cmd == "relays")
-                data += 1 << 3;
+                data[0] += 1 << 3;
             else if (cmd == "motor")
-                data += 2 << 3;
-            data += args;
-            antennaeCtrl.usartSendBytes(new byte[] { data });
-            if (data == 0)
-                data = 1;
-            System.Diagnostics.Debug.WriteLine(data.ToString());
+                data[0] += 2 << 3;
+            data[0] += args;           
             if ( extraArgs != 0 )
             {
-                byte hi = Convert.ToByte((extraArgs | (31 << 5)) >> 5 + 1 + mcID);
-                byte lo = Convert.ToByte(extraArgs | 31 + 32 + mcID);
-                antennaeCtrl.usartSendBytes(new byte[] { hi, lo });
+                data[1] = Convert.ToByte((extraArgs | (31 << 5)) >> 5 + 1);
+                data[2] = Convert.ToByte(extraArgs | 31 + 32);
             }
+            await trSemaphore.WaitAsync().ConfigureAwait(false);
+            antennaeMsg(mc, data);
+            trSemaphore.Release();
+        }
+
+        private void antennaeMsg( byte mc, byte[] data)
+        {
+            byte[] _data = new byte[data.Length];
+            byte mcID = Convert.ToByte(mc << 5);
+            for (int c = 0; c < data.Length; c++)
+            {
+                _data[c] = Convert.ToByte(mcID + data[c]);
+                if (_data[c] == 0)
+                    _data[c] = 1;
+            }
+            antennaeCtrl.usartSendBytes(_data);
         }
 
         public MCAngle getMCAngle()
