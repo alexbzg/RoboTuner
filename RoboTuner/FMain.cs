@@ -189,6 +189,7 @@ namespace RoboTuner
         System.Threading.Timer antennaePingTimer;
         MotorState[] motorsState = new MotorState[mcCount];
         SemaphoreSlim trSemaphore = new SemaphoreSlim(1);
+        Label[] motorLabels = new Label[mcCount * 2];
 
         public FMain()
         {
@@ -211,6 +212,15 @@ namespace RoboTuner
                     if (currentFreq != freq)
                         setCurrentFreq( freq );
                 };
+            }
+            for (int c = 0; c < mcCount * 2; c++)
+            {
+                motorLabels[c] = new Label();
+                motorLabels[c].Text = "M" + (c + 1).ToString() + " 0";
+                motorLabels[c].ForeColor = Color.Red;
+                motorLabels[c].Left = 1;
+                motorLabels[c].Top = 1 + motorLabels[c].Height * c;
+                pMotors.Controls.Add(motorLabels[c]);
             }
             pTuning.Refresh();
             if (config.data.remoteJeromeParams != null)
@@ -236,6 +246,20 @@ namespace RoboTuner
             antennaeCtrl.switchLine(antennaeControllerTemplate.trLine, 0);
             await Task.Delay(250);
             trSemaphore.Release();
+            DoInvoke(() => {
+                for (int c = 0; c < mcCount; c++)
+                {
+                    if (motorsState[c].updated)
+                        for (int c0 = 0; c0 < 2; c0++)
+                        {
+                            motorLabels[c * 2 + c0].ForeColor = Color.Green;
+                            motorLabels[c * 2 + c0].Text = "M" + (c * 2 + c0 + 1).ToString() + " " + motorsState[c].positions[c0].ToString();
+                        }
+                    else
+                        for (int c0 = 0; c0 < 2; c0++)
+                            motorLabels[c * 2 + c0].ForeColor = Color.Red;
+                }
+            });
         }
 
         private void setCurrentFreq( int freq )
@@ -255,13 +279,13 @@ namespace RoboTuner
                 afp.activate();
         }
 
-        private void tune( string dir, int angle)
+        private async Task tune( string dir, int angle)
         {
             lAngle.Text = angle.ToString();
             lAntTitle.Text = antennaeTitles[dir];
             currentAngle = angle;
             currentDir = dir;
-            setActiveType(true);
+            await setActiveType(true);
             foreach (int freq in antFreqPanels.Keys )
             {
                 AntFreqPanel afp = antFreqPanels[freq];
@@ -269,7 +293,7 @@ namespace RoboTuner
                 afp.setAllCaptions(freqSettings);
             }
             antFreqPanels[freqStart].activate();
-            setRelays();
+            await setRelays();
         }
 
         private void createTuneMenuItem( string dir )
@@ -281,8 +305,9 @@ namespace RoboTuner
                 string d = dir;
                 ToolStripMenuItem miAngle = new ToolStripMenuItem(angle.ToString());
                 mi.DropDownItems.Add(miAngle);
-                miAngle.Click += delegate {
-                    tune(d, a);
+                miAngle.Click += async delegate
+                {
+                    await tune(d, a);
                 };
             }
             miTune.DropDownItems.Add(mi);
@@ -363,7 +388,7 @@ namespace RoboTuner
             });
         }
 
-        private void antennaeConnected(object sender, EventArgs e)
+        private async void antennaeConnected(object sender, EventArgs e)
         {
             antennaeCtrl.setLineMode(antennaeControllerTemplate.trLine, "out");
             antennaeCtrl.switchLine(antennaeControllerTemplate.trLine, 1);
@@ -372,7 +397,7 @@ namespace RoboTuner
                 processConnections();
                 lAntennaeDisconnect.Visible = false;
             });
-            setRelays();
+            await setRelays();
         }
 
         private void processConnections()
@@ -391,7 +416,7 @@ namespace RoboTuner
            });
         }
 
-        private void encValueChange(int encC, EncoderRotatedEventArgs e)
+        private async void encValueChange(int encC, EncoderRotatedEventArgs e)
         {
             int motorNo = encC;
             if (!activeType)
@@ -402,7 +427,7 @@ namespace RoboTuner
                 antFreqPanels[currentFreq].setCaption(motorNo, curFreqSettings.motors[motorNo]);
           });
             MCElem mce = getMCAngle().motors[encC];
-            antennaeCmd(mce.mc, "motor", mce.elem, curFreqSettings.motors[motorNo]);
+            await antennaeCmd(mce.mc, "motor", mce.elem, curFreqSettings.motors[motorNo]);
         }
 
         private void remoteLineStateChanged(object sender, LineStateChangedEventArgs e)
@@ -450,12 +475,12 @@ namespace RoboTuner
                 connectRemoteCtrl();
         }
 
-        private void lAngleAux_Click(object sender, EventArgs e )
+        private async void lAngleAux_Click(object sender, EventArgs e )
         {
-            setActiveType(sender == lAngle);
+            await setActiveType(sender == lAngle);
         }
 
-        private void setActiveType( bool type)
+        private async Task setActiveType( bool type)
         {
             if (type != activeType)
             {
@@ -470,11 +495,11 @@ namespace RoboTuner
                     lAux.ForeColor = Color.Red;
                 }
                 activeType = type;
-                setRelays();
+                await setRelays();
             }
         }
 
-        private void setRelays()
+        private async Task setRelays()
         {
             MCElem[] relays = getMCAngle().relays;
             for (byte mc = 0; mc < mcCount; mc++)
@@ -483,12 +508,12 @@ namespace RoboTuner
                 for (byte rc = 0; rc < relays.Length; rc++)
                     if (relays[rc].mc == mc)
                         args += Convert.ToByte( 1 << relays[rc].elem );
-                antennaeCmd(mc, "relays", args, 0);
+                await antennaeCmd(mc, "relays", args, 0);
             }
         }
 
 
-        private async void antennaeCmd( byte mc, string cmd, byte args, int extraArgs )
+        private async Task antennaeCmd( byte mc, string cmd, byte args, int extraArgs )
         {
             byte[] data = new byte[extraArgs == 0 ? 1 : 3];
             data[0] = 0;
@@ -556,7 +581,7 @@ namespace RoboTuner
         }
 
 
-        private void bSave_Click(object sender, EventArgs e)
+        private async void bSave_Click(object sender, EventArgs e)
         {
             AntFreqSettings storedAFS = config.data.getFreqSettings(currentDir, currentAngle, currentFreq);
             Array.Copy( curFreqSettings.motors, storedAFS.motors, storedAFS.motors.Length );
@@ -567,14 +592,14 @@ namespace RoboTuner
             {
                 int angleIdx = Array.IndexOf(angles[currentDir], currentAngle);
                 if (angleIdx < angles[currentDir].Length - 1)
-                    tune(currentDir, angles[currentDir][angleIdx + 1]);
+                    await tune(currentDir, angles[currentDir][angleIdx + 1]);
                 else
                 {
                     int dirIdx = Array.IndexOf(directions, currentDir);
                     string newDir = directions[0];
                     if (dirIdx < directions.Length - 1)
                         newDir = directions[dirIdx + 1];
-                    tune(newDir, angles[newDir][0]);
+                    await tune(newDir, angles[newDir][0]);
                 }
             }
         }

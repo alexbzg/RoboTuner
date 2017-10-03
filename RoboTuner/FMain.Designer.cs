@@ -49,6 +49,7 @@
             this.lD = new System.Windows.Forms.Label();
             this.lRemoteDisconnect = new System.Windows.Forms.Label();
             this.lAntennaeDisconnect = new System.Windows.Forms.Label();
+            this.pMotors = new System.Windows.Forms.Panel();
             this.menuStrip1.SuspendLayout();
             this.pTuning.SuspendLayout();
             this.SuspendLayout();
@@ -257,11 +258,20 @@
             this.lAntennaeDisconnect.TabIndex = 3;
             this.lAntennaeDisconnect.Text = "Антенны: нет связи";
             // 
+            // pMotors
+            // 
+            this.pMotors.Dock = System.Windows.Forms.DockStyle.Right;
+            this.pMotors.Location = new System.Drawing.Point(278, 0);
+            this.pMotors.Name = "pMotors";
+            this.pMotors.Size = new System.Drawing.Size(148, 524);
+            this.pMotors.TabIndex = 2;
+            // 
             // FMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(275, 524);
+            this.ClientSize = new System.Drawing.Size(426, 524);
+            this.Controls.Add(this.pMotors);
             this.Controls.Add(this.pTuning);
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -303,6 +313,7 @@
         private System.Windows.Forms.Label lAntennaeDisconnect;
         private System.Windows.Forms.ToolStripMenuItem miJeromeSetup;
         private System.Windows.Forms.ToolStripContainer toolStripContainer1;
+        private System.Windows.Forms.Panel pMotors;
     }
 }
 
