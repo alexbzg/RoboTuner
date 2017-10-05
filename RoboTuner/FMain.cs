@@ -8,6 +8,7 @@ using XmlConfigNS;
 using JeromeModuleSettings;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace RoboTuner
 {
@@ -190,6 +191,7 @@ namespace RoboTuner
         MotorState[] motorsState = new MotorState[mcCount];
         SemaphoreSlim trSemaphore = new SemaphoreSlim(1);
         Label[] motorLabels = new Label[mcCount * 2];
+        Stopwatch antennaeStopwatch = new Stopwatch();
 
         public FMain()
         {
@@ -231,13 +233,32 @@ namespace RoboTuner
                 connectAntennaeCtrl();
             else
                 miAntennaeConnect.Visible = false;
+            for (int c = 0; c < motorsState.Length; c++)
+                motorsState[c] = new MotorState();
             tune(directions[0], angles[directions[0]][0]);
             antennaePingTimer = new System.Threading.Timer(obj => pingAntennae(), null, 1000, 1000);
         }
 
+        private void antennaeTR(string val) {
+            antennaeCtrl.switchLine(antennaeControllerTemplate.trLine, val == "in" ? 0 : 1);
+        }
+
         private async void pingAntennae()
         {
-            if (antennaeCtrl == null || !antennaeCtrl.connected)
+            int delay = 20;
+            if (antennaeStopwatch.IsRunning)
+            {
+                Debug.WriteLine("No answer received");
+                antennaeStopwatch.Reset();
+            }
+            antennaeTR("out");
+            await Task.Delay(delay);
+            //System.Diagnostics.Debug.WriteLine("ping");
+            antennaeCtrl.usartSendBytes(new byte[] { 111 });
+            await Task.Delay(delay);
+            antennaeTR("in");
+            antennaeStopwatch.Start();
+            /*if (antennaeCtrl == null || !antennaeCtrl.connected)
                 return;
             await trSemaphore.WaitAsync().ConfigureAwait(false);
             if ( antennaeCtrl != null && antennaeCtrl.connected)
@@ -246,6 +267,7 @@ namespace RoboTuner
             antennaeCtrl.switchLine(antennaeControllerTemplate.trLine, 0);
             await Task.Delay(250);
             trSemaphore.Release();
+            antennaeCtrl.switchLine(antennaeControllerTemplate.trLine, 1);
             DoInvoke(() => {
                 for (int c = 0; c < mcCount; c++)
                 {
@@ -259,7 +281,7 @@ namespace RoboTuner
                         for (int c0 = 0; c0 < 2; c0++)
                             motorLabels[c * 2 + c0].ForeColor = Color.Red;
                 }
-            });
+            });*/
         }
 
         private void setCurrentFreq( int freq )
@@ -357,17 +379,23 @@ namespace RoboTuner
 
         private void antennaeBytesReceived(object sender, AsyncConnectionNS.BytesReceivedEventArgs e)
         {
-            foreach (byte b in e.bytes)
+            bool f = false;
+            for( int c = 0; c < e.count; c++ )
             {
-                if (b == 0)
+                if (e.bytes[c] != 0)
+                {
+                    System.Diagnostics.Debug.WriteLine(e.bytes[c].ToString());
+                    f = true;
+                }
+            /*    if (b == 0)
                     continue;
                 int mc = ( b | (7 << 5) ) >> 5;
                 MotorState ms = motorsState[mc];
                 if ( ++ms.rcvd % 2 == 1)
-                    ms.buf += b | 15;          
+                    ms.buf = b | 15;          
                 else 
                 {
-                    ms.buf += (b | 31) - 1;
+                    ms.buf += ( (b | 31) - 1 ) << 4;
                     ms.positions[ms.rcvd / 2] = ms.buf;
                     ms.buf = 0;
                     if (ms.rcvd == 4)
@@ -375,7 +403,14 @@ namespace RoboTuner
                         ms.rcvd = 0;
                         ms.updated = true;
                     }
-                }
+                }*/
+            }
+            if (f)
+            {
+                antennaeStopwatch.Stop();
+                Debug.WriteLine("Elapsed " + antennaeStopwatch.ElapsedMilliseconds.ToString());
+                antennaeStopwatch.Reset();
+                antennaeTR("out");
             }
         }
 
@@ -541,6 +576,10 @@ namespace RoboTuner
                 _data[c] = Convert.ToByte(mcID + data[c]);
                 if (_data[c] == 0)
                     _data[c] = 1;
+                string d = "";
+                for (int cd = 0; cd < 8; cd++)
+                    d += (_data[c] & (1 << (7 - cd))) == 0 ? "0" : "1";
+                System.Diagnostics.Debug.WriteLine(d);
             }
             antennaeCtrl.usartSendBytes(_data);
         }
