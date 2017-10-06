@@ -192,6 +192,7 @@ namespace RoboTuner
         SemaphoreSlim trSemaphore = new SemaphoreSlim(1);
         Label[] motorLabels = new Label[mcCount * 2];
         Stopwatch antennaeStopwatch = new Stopwatch();
+        int recCount = 0;
 
         public FMain()
         {
@@ -225,49 +226,42 @@ namespace RoboTuner
                 pMotors.Controls.Add(motorLabels[c]);
             }
             pTuning.Refresh();
-            if (config.data.remoteJeromeParams != null)
+            /*if (config.data.remoteJeromeParams != null)
                 connectRemoteCtrl();
             else
-                miRemoteConnect.Visible = false;
-            if (config.data.antennaeJeromeParams != null)
+                miRemoteConnect.Visible = false;*/
+            /*if (config.data.antennaeJeromeParams != null)
                 connectAntennaeCtrl();
             else
-                miAntennaeConnect.Visible = false;
+                miAntennaeConnect.Visible = false;*/
             for (int c = 0; c < motorsState.Length; c++)
                 motorsState[c] = new MotorState();
             tune(directions[0], angles[directions[0]][0]);
-            antennaePingTimer = new System.Threading.Timer(obj => pingAntennae(), null, 1000, 1000);
+            antennaePingTimer = new System.Threading.Timer(async delegate { await pingAntennae(); }, null, 1000, 1000);
         }
 
         private void antennaeTR(string val) {
             antennaeCtrl.switchLine(antennaeControllerTemplate.trLine, val == "in" ? 0 : 1);
         }
 
-        private async void pingAntennae()
+        private async Task pingAntennae()
         {
             int delay = 20;
-            if (antennaeStopwatch.IsRunning)
+            if (antennaeCtrl == null || !antennaeCtrl.connected)
+                return;
+            foreach (MotorState ms in motorsState)
             {
-                Debug.WriteLine("No answer received");
-                antennaeStopwatch.Reset();
+                ms.updated = false;
+                ms.rcvd = 0;
             }
-            antennaeTR("out");
-            await Task.Delay(delay);
-            //System.Diagnostics.Debug.WriteLine("ping");
-            antennaeCtrl.usartSendBytes(new byte[] { 111 });
+            await trSemaphore.WaitAsync();
+            antennaeCtrl.usartSendBytes(new byte[] { 1 });
             await Task.Delay(delay);
             antennaeTR("in");
             antennaeStopwatch.Start();
-            /*if (antennaeCtrl == null || !antennaeCtrl.connected)
-                return;
-            await trSemaphore.WaitAsync().ConfigureAwait(false);
-            if ( antennaeCtrl != null && antennaeCtrl.connected)
-                for (byte c = 0; c < mcCount; c++)
-                    antennaeMsg(c, new byte[] { 0 } );
-            antennaeCtrl.switchLine(antennaeControllerTemplate.trLine, 0);
             await Task.Delay(250);
+            antennaeTR("out");
             trSemaphore.Release();
-            antennaeCtrl.switchLine(antennaeControllerTemplate.trLine, 1);
             DoInvoke(() => {
                 for (int c = 0; c < mcCount; c++)
                 {
@@ -281,7 +275,7 @@ namespace RoboTuner
                         for (int c0 = 0; c0 < 2; c0++)
                             motorLabels[c * 2 + c0].ForeColor = Color.Red;
                 }
-            });*/
+            });
         }
 
         private void setCurrentFreq( int freq )
@@ -379,38 +373,29 @@ namespace RoboTuner
 
         private void antennaeBytesReceived(object sender, AsyncConnectionNS.BytesReceivedEventArgs e)
         {
-            bool f = false;
             for( int c = 0; c < e.count; c++ )
             {
-                if (e.bytes[c] != 0)
+                byte b = e.bytes[c];
+                if (b != 0)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.bytes[c].ToString());
-                    f = true;
-                }
-            /*    if (b == 0)
-                    continue;
-                int mc = ( b | (7 << 5) ) >> 5;
-                MotorState ms = motorsState[mc];
-                if ( ++ms.rcvd % 2 == 1)
-                    ms.buf = b | 15;          
-                else 
-                {
-                    ms.buf += ( (b | 31) - 1 ) << 4;
-                    ms.positions[ms.rcvd / 2] = ms.buf;
-                    ms.buf = 0;
-                    if (ms.rcvd == 4)
+                    recCount++;
+                    int mc = (b & (7 << 5)) >> 5;
+                    MotorState ms = motorsState[mc];
+                    if (++ms.rcvd % 2 == 1)
+                        ms.buf = b & 15;
+                    else
                     {
-                        ms.rcvd = 0;
-                        ms.updated = true;
+                        ms.buf += ((b & 31) - 1) << 4;
+                        ms.positions[ms.rcvd / 2 - 1] = ms.buf == 401 ? -1 : ms.buf;
+                        Debug.WriteLine(mc.ToString() + " " + (ms.rcvd / 2).ToString() + ": " + ms.buf.ToString());
+                        ms.buf = 0;
+                        if (ms.rcvd == 4)
+                        {
+                            ms.rcvd = 0;
+                            ms.updated = true;
+                        }
                     }
-                }*/
-            }
-            if (f)
-            {
-                antennaeStopwatch.Stop();
-                Debug.WriteLine("Elapsed " + antennaeStopwatch.ElapsedMilliseconds.ToString());
-                antennaeStopwatch.Reset();
-                antennaeTR("out");
+                }
             }
         }
 
@@ -550,6 +535,8 @@ namespace RoboTuner
 
         private async Task antennaeCmd( byte mc, string cmd, byte args, int extraArgs )
         {
+            if (antennaeCtrl == null || !antennaeCtrl.connected)
+                return;
             byte[] data = new byte[extraArgs == 0 ? 1 : 3];
             data[0] = 0;
             if (cmd == "relays")
