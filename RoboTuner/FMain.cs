@@ -341,7 +341,6 @@ namespace RoboTuner
                 {
                     int line = encT.lines[c];
                     encoderLines[line] = new EncoderLine() { dir = c == 0 ? -1 : 1, enc = enc };
-                    remoteCtrl.setLineMode(line, "in");
                 }
                 encoderLines[encT.lines[1]] = new EncoderLine() { dir = 1, enc = enc };
                 int _encC = encC;
@@ -442,6 +441,10 @@ namespace RoboTuner
             if (!activeType)
                 motorNo += 2;
             curFreqSettings.motors[motorNo] += e.value;
+            if (curFreqSettings.motors[motorNo] > 400)
+                curFreqSettings.motors[motorNo] = 400;
+            if (curFreqSettings.motors[motorNo] < 0)
+                curFreqSettings.motors[motorNo] = 0;
             DoInvoke(() =>
           {
                 antFreqPanels[currentFreq].setCaption(motorNo, curFreqSettings.motors[motorNo]);
@@ -463,6 +466,8 @@ namespace RoboTuner
         private void remoteConnected(object sender, EventArgs e)
         {
             remoteCtrl.readlines();
+            foreach ( int line in encoderLines.Keys)
+                remoteCtrl.setLineMode(line, "in");
             DoInvoke(() =>
            {
                processConnections();
@@ -546,8 +551,8 @@ namespace RoboTuner
             data[0] += args;           
             if ( extraArgs != 0 )
             {
-                data[1] = Convert.ToByte((extraArgs | (31 << 5)) >> 5 + 1);
-                data[2] = Convert.ToByte(extraArgs | 31 + 32);
+                data[1] = Convert.ToByte((extraArgs & 15) + 16);
+                data[2] = Convert.ToByte(((extraArgs & (31 << 4)) >> 4) + 1);
             }
             await trSemaphore.WaitAsync().ConfigureAwait(false);
             antennaeMsg(mc, data);
