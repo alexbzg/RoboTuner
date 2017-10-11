@@ -533,7 +533,7 @@ namespace RoboTuner
                 for (byte rc = 0; rc < relays.Length; rc++)
                     if (relays[rc].mc == mc)
                         args += Convert.ToByte( 1 << relays[rc].elem );
-                await antennaeCmd(mc, "relays", args, 0);
+                await antennaeCmd(mc, "relays", args, -1);
             }
         }
 
@@ -542,17 +542,17 @@ namespace RoboTuner
         {
             if (antennaeCtrl == null || !antennaeCtrl.connected)
                 return;
-            byte[] data = new byte[extraArgs == 0 ? 1 : 3];
+            byte[] data = new byte[extraArgs == -1 ? 1 : 3];
             data[0] = 0;
             if (cmd == "relays")
                 data[0] += 1 << 3;
             else if (cmd == "motor")
                 data[0] += 2 << 3;
             data[0] += args;           
-            if ( extraArgs != 0 )
+            if ( extraArgs != -1 )
             {
                 data[1] = Convert.ToByte((extraArgs & 15) + 16);
-                data[2] = Convert.ToByte(((extraArgs & (31 << 4)) >> 4) + 1);
+                data[2] = Convert.ToByte(((extraArgs & (31 << 4)) >> 4) + 2);
             }
             await trSemaphore.WaitAsync().ConfigureAwait(false);
             antennaeMsg(mc, data);
@@ -565,13 +565,16 @@ namespace RoboTuner
             byte mcID = Convert.ToByte(mc << 5);
             for (int c = 0; c < data.Length; c++)
             {
-                _data[c] = Convert.ToByte(mcID + data[c]);
-                if (_data[c] == 0)
-                    _data[c] = 1;
+                byte b = Convert.ToByte(mcID + data[c]);
+                if (b == 0)
+                    b = 1;
                 string d = "";
                 for (int cd = 0; cd < 8; cd++)
-                    d += (_data[c] & (1 << (7 - cd))) == 0 ? "0" : "1";
+                    d += (b & (1 << (7 - cd))) == 0 ? "0" : "1";
                 System.Diagnostics.Debug.WriteLine(d);
+                //antennaeCtrl.usartSendBytes(new byte[] { b });
+                _data[c] = b;
+                //await Task.Delay(10);
             }
             antennaeCtrl.usartSendBytes(_data);
         }
@@ -672,6 +675,14 @@ namespace RoboTuner
             fms.ShowDialog();
         }
 
+        private async void button1_Click(object sender, EventArgs e)
+        {
+            /*for (byte c=0; c<2; c++)
+                await antennaeCmd(0, "motor", c, Convert.ToInt32(tbDebug.Text));*/
+            await antennaeCmd(0, "motor", 0, Convert.ToInt32(tbDebug.Text)); 
+
+
+        }
     }
 
     public class EncoderRotatedEventArgs : EventArgs

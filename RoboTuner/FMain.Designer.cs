@@ -50,8 +50,11 @@
             this.lRemoteDisconnect = new System.Windows.Forms.Label();
             this.lAntennaeDisconnect = new System.Windows.Forms.Label();
             this.pMotors = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
+            this.tbDebug = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.pTuning.SuspendLayout();
+            this.pMotors.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -260,11 +263,30 @@
             // 
             // pMotors
             // 
+            this.pMotors.Controls.Add(this.button1);
+            this.pMotors.Controls.Add(this.tbDebug);
             this.pMotors.Dock = System.Windows.Forms.DockStyle.Right;
             this.pMotors.Location = new System.Drawing.Point(278, 0);
             this.pMotors.Name = "pMotors";
             this.pMotors.Size = new System.Drawing.Size(148, 524);
             this.pMotors.TabIndex = 2;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(3, 432);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 35);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "bDebug";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // tbDebug
+            // 
+            this.tbDebug.Location = new System.Drawing.Point(3, 400);
+            this.tbDebug.Name = "tbDebug";
+            this.tbDebug.Size = new System.Drawing.Size(100, 26);
+            this.tbDebug.TabIndex = 4;
             // 
             // FMain
             // 
@@ -284,6 +306,8 @@
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.pTuning.ResumeLayout(false);
+            this.pMotors.ResumeLayout(false);
+            this.pMotors.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -314,6 +338,8 @@
         private System.Windows.Forms.ToolStripMenuItem miJeromeSetup;
         private System.Windows.Forms.ToolStripContainer toolStripContainer1;
         private System.Windows.Forms.Panel pMotors;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.TextBox tbDebug;
     }
 }
 
